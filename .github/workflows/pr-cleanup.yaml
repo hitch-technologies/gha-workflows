@@ -8,10 +8,6 @@ on:
         type: string
         required: true
         description: '#gh-deploy-dev ID'
-      NAMESPACE:
-        type: string
-        required: true
-        description: 'Namespace in the cluster'
       KUSTOMIZE_OVERLAY:
         type: string
         required: true
@@ -123,7 +119,6 @@ jobs:
       - name: Delete PR from cluster
         uses: hitch-technologies/gha-workflows/actions/delete@main
         with:
-          NAMESPACE: ${{ inputs.NAMESPACE }}
           KUSTOMIZE_OVERLAY: ${{ inputs.KUSTOMIZE_OVERLAY }}
 
       - name: Notify Slack of Success
