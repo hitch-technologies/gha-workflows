@@ -1,0 +1,34 @@
+name: 'NGINX conf test'
+description: 'Test the NGINX configuration file'
+
+inputs:
+  NGINX_CONFIG_FILES_EXPORT:
+    description: 'The config file names'
+    required: true
+  NGINX_IMAGE:
+    description: 'The NGINX image'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Config Tests
+      shell: bash {0}
+      run: |
+      
+        NGINX_CONFIG_FILE_EXPORT_ARRAY=${{ inputs.NGINX_CONFIG_FILES_EXPORT }}
+        for i in "${!NGINX_CONFIG_FILE_EXPORT_ARRAY[@]}"; do
+
+          result=$(docker run --rm -t -a stdout --name dev-nginx-test --mount type=bind,source="$(pwd)"/${NGINX_CONFIG_FILE_EXPORT_ARRAY[i]},target=/usr/local/openresty/nginx/conf/nginx.conf,readonly ${{ inputs.NGINX_IMAGE }} nginx -c /usr/local/openresty/nginx/conf/nginx.conf -t)
+
+          # Look for the word successful and count the lines that have it
+          successful=$(echo $result | grep successful | wc -l)
+
+          if [ $successful = 0 ]; then
+            echo FAILED
+            echo "$result"
+            exit 1
+          else
+            echo SUCCESS
+          fi
+        done
