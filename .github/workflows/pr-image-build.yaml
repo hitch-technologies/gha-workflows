@@ -94,7 +94,7 @@ jobs:
         uses: unfor19/install-aws-cli-action@master
 
       - name: ECR repo setup
-        uses: hitch-technologies/gha-workflows/actions/ecr-setup@master
+        uses: hitch-technologies/gha-workflows/actions/ecr-setup@main
         with:
           ECR_REPO: ${{ inputs.ECR_REPO }}
 

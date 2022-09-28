@@ -108,30 +108,30 @@ jobs:
           PATTERN: $TAG 
 
       - name: Deploy PR
-        uses: hitch-technologies/gha-workflows/actions/deploy@master
+        uses: hitch-technologies/gha-workflows/actions/deploy@main
         with:
           NAMESPACE: ${{ inputs.NAMESPACE }}
           KUSTOMIZE_OVERLAY: ${{ inputs.KUSTOMIZE_OVERLAY }}
 
       - name: Restart deployment
         if: github.event.action == 'synchronize'
-        uses: hitch-technologies/gha-workflows/actions/restart-deployment@master
+        uses: hitch-technologies/gha-workflows/actions/restart-deployment@main
         with:
           KUSTOMIZE_ROOT: ${{ inputs.KUSTOMIZE_ROOT }}
 
       # TODO: Check if external-dns can offload this step
-      - name: "Create PR DNS Record "
-        if: github.event.action != 'synchronize'
-        uses: Roosterfish/aws-route53-record-set-action@master
-        with: 
-          aws_access_key_id: ${{ secrets.aws-access-key-id }}
-          aws_secret_access_key: ${{ secrets.aws-secret-access-key }}
-          aws_route53_hosted_zone_id: ${{ inputs.HOSTED_ZONE_ID_INT }}
-          aws_route53_rr_action: "CREATE"
-          aws_route53_rr_name: ${{ env.TAG }}.${{ inputs.DOMAIN_INT }}
-          aws_route53_rr_type: "CNAME"
-          aws_route53_rr_ttl: "300"
-          aws_route53_rr_value: "${{ inputs.DOMAIN_INT_ELB }}"
+      # - name: "Create PR DNS Record "
+      #   if: github.event.action != 'synchronize'
+      #   uses: Roosterfish/aws-route53-record-set-action@master
+      #   with: 
+      #     aws_access_key_id: ${{ secrets.aws-access-key-id }}
+      #     aws_secret_access_key: ${{ secrets.aws-secret-access-key }}
+      #     aws_route53_hosted_zone_id: ${{ inputs.HOSTED_ZONE_ID_INT }}
+      #     aws_route53_rr_action: "CREATE"
+      #     aws_route53_rr_name: ${{ env.TAG }}.${{ inputs.DOMAIN_INT }}
+      #     aws_route53_rr_type: "CNAME"
+      #     aws_route53_rr_ttl: "300"
+      #     aws_route53_rr_value: "${{ inputs.DOMAIN_INT_ELB }}"
       
       - name: Notify Slack of Success
         if: success()
