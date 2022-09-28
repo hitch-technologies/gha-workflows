@@ -113,7 +113,7 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v2
         with:
-          context: .
+          context: ${{ inputs.CONTEXT }}
           file: ./Dockerfile
           push: true
           # caching to ECR seems not supported yet
