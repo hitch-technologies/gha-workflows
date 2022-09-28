@@ -4,7 +4,7 @@ on:
   workflow_call:
 
     inputs:
-      SLACK_DEV_DEPLOY_CHANNEL_ID:
+      SLACK_PR_CHANNEL_ID:
         type: string
         required: true
         description: '#gh-deploy-dev ID'
@@ -74,7 +74,7 @@ jobs:
         id: gh-cleanup-dev
         uses: voxmedia/github-action-slack-notify-build@v1
         with:
-          channel_id: ${{ inputs.SLACK_DEV_DEPLOY_CHANNEL_ID }}
+          channel_id: ${{ inputs.SLACK_PR_CHANNEL_ID }}
           status: |
             ${{ env.TAG }} closed. Recycling...
 
@@ -130,7 +130,7 @@ jobs:
         if: success()
         uses: voxmedia/github-action-slack-notify-build@v1
         with:
-          channel_id: ${{ inputs.SLACK_DEV_DEPLOY_CHANNEL_ID }}
+          channel_id: ${{ inputs.SLACK_PR_CHANNEL_ID }}
           message_id: ${{ steps.gh-cleanup-dev.outputs.message_id }}
           status: |
             ${{ env.TAG }} closed and recycled
@@ -147,7 +147,7 @@ jobs:
         if: failure()
         uses: voxmedia/github-action-slack-notify-build@v1
         with:
-          channel_id: ${{ inputs.SLACK_DEV_DEPLOY_CHANNEL_ID }}
+          channel_id: ${{ inputs.SLACK_PR_CHANNEL_ID }}
           message_id: ${{ steps.gh-cleanup-dev.outputs.message_id }}
           status: |
             ${{ env.TAG }} closed. Recycling failed
