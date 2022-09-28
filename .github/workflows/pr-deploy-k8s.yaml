@@ -110,7 +110,6 @@ jobs:
       - name: Deploy PR
         uses: hitch-technologies/gha-workflows/actions/deploy@main
         with:
-          NAMESPACE: ${{ inputs.NAMESPACE }}
           KUSTOMIZE_OVERLAY: ${{ inputs.KUSTOMIZE_OVERLAY }}
 
       - name: Restart deployment

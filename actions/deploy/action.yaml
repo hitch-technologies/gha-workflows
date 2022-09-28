@@ -2,9 +2,6 @@ name: 'Deploy using kubectl and kustomize'
 description: 'In-cluster deployment'
 
 inputs:
-  NAMESPACE:
-    description: 'Namespace for the service to be deployed at'
-    required: true
   KUSTOMIZE_OVERLAY:
     description: 'path to kustomize overlay'
     required: true
@@ -20,5 +17,5 @@ runs:
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
         echo "Deploying"
-        if [  -z "${{ inputs.NAMESPACE }}" ]; then kubectl apply -k ${{ inputs.KUSTOMIZE_OVERLAY }}; else kubectl apply -n ${{ inputs.NAMESPACE }} -k ${{ inputs.KUSTOMIZE_OVERLAY }}; fi
+        kubectl apply -k ${{ inputs.KUSTOMIZE_OVERLAY }}
 

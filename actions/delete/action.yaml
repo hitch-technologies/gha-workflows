@@ -2,9 +2,6 @@ name: 'Delete PR using kubectl and kustomize'
 description: 'In-cluster PR deletion'
 
 inputs:
-  NAMESPACE:
-    description: 'Namespace for the service to be deployed at'
-    required: true
   KUSTOMIZE_OVERLAY:
     description: 'path to kustomize overlay'
     required: true
@@ -24,4 +21,4 @@ runs:
         chmod +x ./kustomize
         sudo mv ./kustomize /usr/local/bin/
         echo "Deploying"
-        cd ${{ inputs.KUSTOMIZE_OVERLAY }} && kustomize build . | kubectl delete -n ${{ inputs.NAMESPACE }} -f -
+        cd ${{ inputs.KUSTOMIZE_OVERLAY }} && kustomize build . | kubectl delete -f -
