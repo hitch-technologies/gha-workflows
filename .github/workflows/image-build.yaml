@@ -115,7 +115,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ${{ inputs.CONTEXT }}
-          file: ./Dockerfile
+          file: ${{ inputs.CONTEXT }}/Dockerfile_new
           push: true
           # caching to ECR seems not supported yet
           # cache-from: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_CACHE_REPO }}:buildcache
