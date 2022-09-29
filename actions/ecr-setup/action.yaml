@@ -16,7 +16,7 @@ runs:
           if echo ${output} | grep -q RepositoryNotFoundException; then
             echo "Repository Not Found. Creating new ECR repo: ${{ inputs.ECR_REPO }}"
             aws ecr create-repository --repository-name ${{ inputs.ECR_REPO }} >/dev/null 2>&1
-            sudo aws s3 cp --recursive s3://hitch-dev-devops/policies/ecr/ .
+            aws s3 cp --recursive s3://hitch-dev-devops/policies/ecr/ .
             aws ecr set-repository-policy --repository-name ${{ inputs.ECR_REPO }} --policy-text file://ecr_policy.json  >/dev/null 2>&1
             aws ecr put-lifecycle-policy --repository-name ${{ inputs.ECR_REPO }} --lifecycle-policy-text file://ecr_lifecycle_policy.json >/dev/null 2>&1
           else
