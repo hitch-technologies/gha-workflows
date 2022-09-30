@@ -66,8 +66,8 @@ on:
 
       - name: Check out code
         uses: actions/checkout@v2
-          with:
-          repository: ${{ inputs.DEPLOYMENT_REPO }}
+        with:
+        repository: ${{ inputs.DEPLOYMENT_REPO }}
 
       - name: Update Kubernetes resources
         run: |
