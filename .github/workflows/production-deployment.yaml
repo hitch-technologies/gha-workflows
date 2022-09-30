@@ -1,4 +1,4 @@
-name: "Deploy to Development"
+name: "Deploy to Production"
 
 on:
   workflow_call:
@@ -19,6 +19,10 @@ on:
         type: string
         required: true
         description: 'Deployment Repository'
+      IMAGE_TAG:
+        type: string
+        required: true
+        description: 'Image Tag'
         
     secrets:
       slack-bot-token:
@@ -46,7 +50,7 @@ jobs:
         run: |
           echo "SHORT_COMMIT=`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
           echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
-          echo "TAG=${GITHUB_REF##*/}-`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
+          echo "TAG=${{ inputs.IMAGE_TAG }} >> $GITHUB_ENV
           echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
           echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
 
@@ -64,7 +68,7 @@ jobs:
           status: |
             Deploying Image on Development
 
-            - Image Tag: ${{ env.TAG }}
+            - Image Tag: ${{ inputs.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: 0037FF
@@ -100,7 +104,7 @@ jobs:
           status: |
             Deployment Created
 
-            - Image Tag: ${{ env.TAG }}
+            - Image Tag: ${{ inputs.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: good
@@ -116,7 +120,7 @@ jobs:
           status: |
             Deployment Failed
 
-            - Image Tag: ${{ env.TAG }}
+            - Image Tag: ${{ inputs.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: danger
