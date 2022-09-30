@@ -74,7 +74,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
         with:
-          repository: ${{ inputs.DEPLOYMENT_REPO }}
+          repository: ${{ inputs.DEPLOYMENT_REPO }}@main
 
       - name: Update Kubernetes resources
         run: |
