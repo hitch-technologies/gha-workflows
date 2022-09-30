@@ -33,6 +33,13 @@ on:
         required: true
       dockerhub-token:
         required: true
+        
+jobs:
+  deploy:
+    runs-on: small-runner
+    outputs:
+      TAG: ${{ env.TAG }}
+      GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
 
     steps:
       - name: Set environment variables
