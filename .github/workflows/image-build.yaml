@@ -39,7 +39,7 @@ on:
         required: true
         
 jobs:
-  default_build:
+  workflow:
     runs-on: small-runner
     outputs:
       TAG: ${{ env.TAG }}

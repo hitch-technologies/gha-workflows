@@ -43,7 +43,7 @@ on:
         required: true
 
 jobs:
-  pr_cleanup:
+  workflow:
     runs-on: small-runner
     outputs:
       TAG: ${{ env.TAG }}
