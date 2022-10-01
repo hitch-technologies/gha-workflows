@@ -81,6 +81,7 @@ jobs:
           ref: main
 
       - name: Update Kubernetes resources
+        uses: imranismail/setup-kustomize@v1
         run: |
           cd ${{ inputs.KUSTOMIZE }}
           kustomize edit set image ${{ inputs.ECR_FULL_PATH }}:OLD_TAG=${{ inputs.ECR_FULL_PATH }}:$TAG
