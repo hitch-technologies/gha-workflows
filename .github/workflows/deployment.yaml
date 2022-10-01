@@ -90,7 +90,9 @@ jobs:
           
       - name: Commit files
         run: |
-          git commit -am "New Deploy $TAG"
+          git config --global user.email "devops@hitch.net"
+          git config --global user.name "Hitch-DevOps"
+          git commit -am "New Deploy $TAG by ${{ env.GITHUB_ACTOR }}"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
