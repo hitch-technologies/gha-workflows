@@ -19,6 +19,10 @@ on:
         type: string
         required: true
         description: 'Deployment Repository'
+      ARGO_ROLLOUTS_URL:
+        type: string
+        required: true
+        description: 'Deployment Repository'
         
     secrets:
       slack-bot-token:
@@ -108,8 +112,9 @@ jobs:
           channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
           status: |
-            Deployment Created
+            Argo Rollouts Deployment Created
 
+            - Argo Rollouts: ${{ env.ARGO_ROLLOUTS_URL }}
             - Image Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
@@ -124,8 +129,9 @@ jobs:
           channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
           status: |
-            Deployment Failed
+            Argo Rollouts Deployment Failed
 
+            - Argo Rollouts: ${{ env.ARGO_ROLLOUTS_URL }}
             - Image Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
