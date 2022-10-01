@@ -80,8 +80,10 @@ jobs:
           token: ${{ secrets.gh-pat }}
           ref: main
 
-      - name: Update Kubernetes resources
+      - name: Setup Kustomize
         uses: imranismail/setup-kustomize@v1
+
+      - name: Update Kubernetes resources
         run: |
           cd ${{ inputs.KUSTOMIZE }}
           kustomize edit set image ${{ inputs.ECR_FULL_PATH }}:OLD_TAG=${{ inputs.ECR_FULL_PATH }}:$TAG
