@@ -29,6 +29,8 @@ on:
         required: true
       aws-region:
         required: true
+      gh-pat:
+        required: true
       dockerhub-username:
         required: true
       dockerhub-token:
@@ -75,6 +77,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ${{ inputs.DEPLOYMENT_REPO }}
+          token: ${{ secrets.gh-pat }}
           ref: main
 
       - name: Update Kubernetes resources
@@ -90,7 +93,7 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           repository: ${{ inputs.DEPLOYMENT_REPO }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.gh-pat }}
 
       - name: Notify Slack of Success
         if: success()
