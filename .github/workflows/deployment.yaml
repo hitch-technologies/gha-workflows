@@ -86,13 +86,13 @@ jobs:
       - name: Update Kubernetes resources
         run: |
           cd ${{ inputs.KUSTOMIZE }}
-          kustomize edit set image ${{ inputs.ECR_FULL_PATH }}:OLD_TAG=${{ inputs.ECR_FULL_PATH }}:$TAG
+          kustomize edit set image ${{ inputs.ECR_FULL_PATH }}:OLD_TAG=${{ inputs.ECR_FULL_PATH }}:${{ env.TAG }}
           
       - name: Commit files
         run: |
           git config --global user.email "devops@hitch.net"
           git config --global user.name "Hitch-DevOps"
-          git commit -am "New Deploy $TAG by ${{ env.GITHUB_ACTOR }}"
+          git commit -am "New Deploy ${{ env.TAG }} by ${{ env.GITHUB_ACTOR }}"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
