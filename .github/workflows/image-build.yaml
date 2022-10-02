@@ -118,9 +118,11 @@ jobs:
 
       - name: Create Git Tag
         uses: rickstaa/action-create-tag@v1
+        continue-on-error: true
         with:
           tag: ${{ env.TAG }}
           message: ${{ env.TAG }}
+          # force_push_tag: true
 
       - name: Notify Slack of Success
         if: success()
