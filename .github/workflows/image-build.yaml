@@ -16,7 +16,11 @@ on:
         type: string
         required: true
         description: 'Elastic Container Repository of the service'
-      CONTEXT:
+      DOCKER_CONTEXT:
+        type: string
+        required: true
+        description: 'Path to service code'
+      DOCKERFILE_PATH:
         type: string
         required: true
         description: 'Path to service code'
@@ -110,8 +114,8 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v2
         with:
-          context: ${{ inputs.CONTEXT }}
-          file: ${{ inputs.CONTEXT }}/Dockerfile_new
+          context: ${{ inputs.DOCKER_CONTEXT }}
+          file: ${{ inputs.DOCKERFILE_PATH }}/Dockerfile_new
           push: true
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ECR_REPO }}:${{ env.TAG }}
