@@ -83,7 +83,7 @@ jobs:
             yq -e '.data."krakend.json"' ${KRAKEND_CONFIG_FILE_PATH_ARRAY[i]} > ${KRAKEND_CONFIG_FILE_EXPORT_ARRAY[i]}
           done
 
-      - name: Running Tests
+      - name: Running Check
         uses: hitch-technologies/gha-workflows/actions/krakend-check@main
         with:
           KRAKEND_CONFIG_FILES_EXPORT: ${{ inputs.KRAKEND_CONFIG_FILES_EXPORT }}
