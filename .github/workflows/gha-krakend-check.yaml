@@ -34,7 +34,7 @@ on:
 
 
 jobs:
-  nginx_test:
+  workflow:
     runs-on: small-runner
     outputs:
       GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
