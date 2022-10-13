@@ -1,28 +1,28 @@
-name: 'NGINX conf test'
-description: 'Test the NGINX configuration file'
+name: 'KrakenD conf check'
+description: 'Check the KrakenD configuration file'
 
 inputs:
-  NGINX_CONFIG_FILES_EXPORT:
+  KRAKEND_CONFIG_FILES_EXPORT:
     description: 'The config file names'
     required: true
-  NGINX_IMAGE:
-    description: 'The NGINX image'
+  KRAKEND_IMAGE:
+    description: 'The KrakenD image'
     required: true
 
 runs:
   using: "composite"
   steps:
-    - name: Config Tests
+    - name: Config Check
       shell: bash {0}
       run: |
       
-        NGINX_CONFIG_FILE_EXPORT_ARRAY=${{ inputs.NGINX_CONFIG_FILES_EXPORT }}
-        for i in "${!NGINX_CONFIG_FILE_EXPORT_ARRAY[@]}"; do
+        KRAKEND_CONFIG_FILE_EXPORT_ARRAY=${{ inputs.KRAKEND_CONFIG_FILES_EXPORT }}
+        for i in "${!KRAKEND_CONFIG_FILE_EXPORT_ARRAY[@]}"; do
 
-          result=$(docker run --rm -t -a stdout --name dev-nginx-test --mount type=bind,source="$(pwd)"/${NGINX_CONFIG_FILE_EXPORT_ARRAY[i]},target=/usr/local/openresty/nginx/conf/nginx.conf,readonly ${{ inputs.NGINX_IMAGE }} nginx -c /usr/local/openresty/nginx/conf/nginx.conf -t)
+          result=$(docker run --rm -t -a stdout --name dev-krakend-check --mount type=bind,source="$(pwd)"/${KRAKEND_CONFIG_FILE_EXPORT_ARRAY[i]},target=/etc/krakend/krakend.json,readonly ${{ inputs.KRAKEND_IMAGE }} krakend check -tlc krakend.json -t)
 
           # Look for the word successful and count the lines that have it
-          successful=$(echo $result | grep successful | wc -l)
+          successful=$(echo $result | grep "Syntax OK!" | wc -l)
 
           if [ $successful = 0 ]; then
             echo FAILED

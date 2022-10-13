@@ -1,0 +1,132 @@
+name: "API Management"
+
+on:
+  workflow_call:
+  
+    inputs:
+      SLACK_DEPLOY_CHANNEL_ID:
+        type: string
+        required: true
+      KUSTOMIZE:
+        type: string
+        required: true
+        description: 'Path to service code'
+      SOURCE_REPO:
+        type: string
+        required: true
+        description: 'Deployment Repository'
+      TARGET_REPO:
+        type: string
+        required: true
+        description: 'Deployment Repository'
+      ENV_FOLDER:
+        type: string
+        required: true
+        description: 'Environemnt Folder'
+        
+    secrets:
+      slack-bot-token:
+        required: true
+      gh-pat:
+        required: true
+      dockerhub-username:
+        required: true
+      dockerhub-token:
+        required: true
+        
+jobs:
+  workflow:
+    runs-on: small-runner
+    outputs:
+      TAG: ${{ env.TAG }}
+      GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
+
+    steps:
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.dockerhub-username }}
+          password: ${{ secrets.dockerhub-token }}
+
+      - name: Notify Slack of Deployment
+        id: gh-deploy-prod
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
+          status: |
+            Deploying Image on Development
+
+            - Image Tag: ${{ env.TAG }}
+            - Actor: ${{ env.GITHUB_ACTOR }}
+            - Job URL: ${{ env.JOB_URL }}
+          color: 0037FF
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
+
+      - name: Checkout hitch-services repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.SOURCE_REPO }}
+          token: ${{ secrets.gh-pat }}
+          ref: new_hitch_infrastructure
+
+      - name: Checkout kubernetes-resources repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.TARGET_REPO }}
+          token: ${{ secrets.gh-pat }}
+          ref: main
+
+      - name: Copy the configmap
+        shell:  bash {0}
+        run: |
+          cp ./hitch-services/${{ inputs.ENV_FOLDER }}/api-gateway.yaml ./kubernetes-resources/services/krakend/${{ inputs.KUSTOMIZE }}/configmap.yaml
+          
+      - name: Commit files
+        run: |
+          cd ./kubernetes-resources
+          git config --global user.email "devops@hitch.net"
+          git config --global user.name "Hitch-DevOps"
+          git commit -am "New KrakenD Confoguration"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          repository: ${{ inputs.TARGET_REPO }}
+          github_token: ${{ secrets.gh-pat }}
+          branch: main
+
+      - name: Notify Slack of Success
+        if: success()
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
+          message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
+          status: |
+            Argo Rollouts Deployment Created
+
+            - Argo Rollouts: ${{ inputs.ARGO_ROLLOUTS_URL }}
+            - Image Tag: ${{ env.TAG }}
+            - Actor: ${{ env.GITHUB_ACTOR }}
+            - Job URL: ${{ env.JOB_URL }}
+          color: good
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
+
+      - name: Notify Slack of Failure
+        if: failure()
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
+          message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
+          status: |
+            Argo Rollouts Deployment Failed
+
+            - Argo Rollouts: ${{ inputs.ARGO_ROLLOUTS_URL }}
+            - Image Tag: ${{ env.TAG }}
+            - Actor: ${{ env.GITHUB_ACTOR }}
+            - Job URL: ${{ env.JOB_URL }}
+          color: danger
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
