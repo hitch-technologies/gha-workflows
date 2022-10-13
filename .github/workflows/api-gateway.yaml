@@ -81,7 +81,7 @@ jobs:
       - name: Copy the configmap
         shell:  bash {0}
         run: |
-          cp ./hitch-services/${{ inputs.ENV_FOLDER }}/api-gateway.yaml ./kubernetes-resources/services/krakend/${{ inputs.KUSTOMIZE }}/configmap.yaml
+          cp ./hitch-services/api-gateway/${{ inputs.ENV_FOLDER }}/configmap.yaml ./kubernetes-resources/services/krakend/${{ inputs.KUSTOMIZE }}/configmap.yaml
           
       - name: Commit files
         run: |
