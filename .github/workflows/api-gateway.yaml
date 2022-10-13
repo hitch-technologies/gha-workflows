@@ -88,7 +88,7 @@ jobs:
           cd ./kubernetes-resources
           git config --global user.email "devops@hitch.net"
           git config --global user.name "Hitch-DevOps"
-          git commit -am "New KrakenD Confoguration"
+          git commit -am "New KrakenD Configuration"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
@@ -104,12 +104,7 @@ jobs:
           channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
           status: |
-            Argo Rollouts Deployment Created
-
-            - Argo Rollouts: ${{ inputs.ARGO_ROLLOUTS_URL }}
-            - Image Tag: ${{ env.TAG }}
-            - Actor: ${{ env.GITHUB_ACTOR }}
-            - Job URL: ${{ env.JOB_URL }}
+            KrakenD deployment successfull
           color: good
         env:
           SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
@@ -121,12 +116,7 @@ jobs:
           channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
           status: |
-            Argo Rollouts Deployment Failed
-
-            - Argo Rollouts: ${{ inputs.ARGO_ROLLOUTS_URL }}
-            - Image Tag: ${{ env.TAG }}
-            - Actor: ${{ env.GITHUB_ACTOR }}
-            - Job URL: ${{ env.JOB_URL }}
+            KrakenD deployment failed
           color: danger
         env:
           SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
