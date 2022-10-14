@@ -19,6 +19,14 @@ on:
         type: string
         required: true
         description: 'Deployment Repository'
+      SOURCE_PATH:
+        type: string
+        required: true
+        description: 'Deployment Repository Path'
+      TARGET_PATH:
+        type: string
+        required: true
+        description: 'Deployment Repository Path'
       ENV_FOLDER:
         type: string
         required: true
