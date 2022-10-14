@@ -19,7 +19,7 @@ runs:
         KRAKEND_CONFIG_FILE_EXPORT_ARRAY=${{ inputs.KRAKEND_CONFIG_FILES_EXPORT }}
         for i in "${!KRAKEND_CONFIG_FILE_EXPORT_ARRAY[@]}"; do
 
-          result=$(docker run --rm -t -a stdout --name dev-krakend-check --mount type=bind,source="$(pwd)"/${KRAKEND_CONFIG_FILE_EXPORT_ARRAY[i]},target=/etc/krakend/krakend.json,readonly ${{ inputs.KRAKEND_IMAGE }} krakend check -tlc krakend.json -t)
+          result=$(docker run --rm -t -a stdout --name dev-krakend-check --mount type=bind,source="$(pwd)"/${KRAKEND_CONFIG_FILE_EXPORT_ARRAY[i]},target=/etc/krakend/krakend.json,readonly ${{ inputs.KRAKEND_IMAGE }} check -tlc krakend.json -t)
 
           # Look for the word successful and count the lines that have it
           successful=$(echo $result | grep "Syntax OK!" | wc -l)
