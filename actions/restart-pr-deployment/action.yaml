@@ -5,12 +5,6 @@ inputs:
   KUSTOMIZE_ROOT:
     description: 'path to kustomize root'
     required: true
-  SERVICE_NAME:
-    description: 'path to kustomize root'
-    required: true
-  SERVICE_NAMESPACE:
-    description: 'path to kustomize root'
-    required: true
 
 runs:
   using: "composite"
@@ -22,5 +16,8 @@ runs:
         curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
+        echo "Restarting pr deployment"
         cd ${{ inputs.KUSTOMIZE_ROOT }}/base
-        kubectl rollout restart deployment ${{ inputs.SERVICE_NAME }} -n ${{ inputs.SERVICE_NAMESPACE }}
+        kubectl delete -f deployment.yaml
+        sleep 1m
+        kubectl apply -f deployment.yaml
