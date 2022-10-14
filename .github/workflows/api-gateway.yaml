@@ -70,6 +70,7 @@ jobs:
           repository: ${{ inputs.SOURCE_REPO }}
           token: ${{ secrets.gh-pat }}
           ref: new_hitch_infrastructure
+          path: ${{ inputs.SOURCE_PATH }}
 
       - name: Checkout kubernetes-resources repo
         uses: actions/checkout@v3
@@ -77,13 +78,12 @@ jobs:
           repository: ${{ inputs.TARGET_REPO }}
           token: ${{ secrets.gh-pat }}
           ref: main
+          path: ${{ inputs.TARGET_PATH }}
 
       - name: Copy the configmap
         shell:  bash {0}
         run: |
-          cd ../hitch-services/
-          ls -al
-          cp ../hitch-services/api-gateway/${{ inputs.ENV_FOLDER }}/configmap.yaml ./services/krakend/${{ inputs.KUSTOMIZE }}/configmap.yaml
+          cp ./${{ inputs.SOURCE_PATH }}/api-gateway/${{ inputs.ENV_FOLDER }}/configmap.yaml ./${{ inputs.TARGET_PATH }}/services/krakend/${{ inputs.KUSTOMIZE }}/configmap.yaml
           
       - name: Commit files
         run: |
