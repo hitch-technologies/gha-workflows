@@ -81,7 +81,7 @@ jobs:
       - name: Copy the configmap
         shell:  bash {0}
         run: |
-          cd ..
+          cd ../hitch-services/
           ls -al
           cp ../hitch-services/api-gateway/${{ inputs.ENV_FOLDER }}/configmap.yaml ./services/krakend/${{ inputs.KUSTOMIZE }}/configmap.yaml
           
