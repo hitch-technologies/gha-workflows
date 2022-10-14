@@ -106,6 +106,7 @@ jobs:
           repository: ${{ inputs.TARGET_REPO }}
           github_token: ${{ secrets.gh-pat }}
           branch: main
+          directory: ${{ inputs.TARGET_PATH }}
 
       - name: Notify Slack of Success
         if: success()
