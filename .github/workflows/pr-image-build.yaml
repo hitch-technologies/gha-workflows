@@ -94,10 +94,10 @@ jobs:
         with:
           ECR_REPO: ${{ inputs.ECR_REPO }}
 
-      - name: Set up Docker Context for Buildx
-        id: buildx-context
-        run: |
-          docker context create builders
+      # - name: Set up Docker Context for Buildx
+      #   id: buildx-context
+      #   run: |
+      #     docker context create builders
 
       - name: Set up Docker Buildx
         id: buildx
