@@ -89,15 +89,10 @@ jobs:
         id: install-aws-cli
         uses: unfor19/install-aws-cli-action@master
 
-      - name: ECR repo setup
-        uses: hitch-technologies/gha-workflows/actions/ecr-setup@main
-        with:
-          ECR_REPO: ${{ inputs.ECR_REPO }}
-
-      # - name: Set up Docker Context for Buildx
-      #   id: buildx-context
-      #   run: |
-      #     docker context create builders
+      - name: Set up Docker Context for Buildx
+        id: buildx-context
+        run: |
+          docker context create builders
 
       - name: Set up Docker Buildx
         id: buildx

@@ -21,4 +21,4 @@ runs:
         chmod +x ./kustomize
         sudo mv ./kustomize /usr/local/bin/
         echo "Deploying"
-        cd ${{ inputs.KUSTOMIZE_OVERLAY }} && kustomize build . | kubectl delete -f -
+        cd ${{ inputs.KUSTOMIZE_OVERLAY }} && kubectl delete -k .

@@ -1,0 +1,29 @@
+name: 'Deploy PR'
+description: 'PR Deployment'
+
+inputs:
+  KUSTOMIZE_OVERLAY:
+    description: 'path to kustomize overlay'
+    required: true
+  NAMESPACE:
+    description: 'Namespace name'
+    required: true
+  SERVICE:
+    description: 'Service name'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: install kubectl, kustomize the deployment, deploy
+      shell: bash
+      run: |
+        echo "Setting up KUBECTL"
+        curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+        echo "Syncing Secret"
+        kubectl get -o yaml secret ${{ inputs.SERVICE }} -ns ${{ inputs.NAMESPACE }} | sed 's/namespace: .*/namespace: ${{ inputs.NAMESPACE }}-pr/' | kubectl apply -f -
+        kubectl get -o yaml configmap ${{ inputs.SERVICE }} -ns ${{ inputs.NAMESPACE }} | sed 's/namespace: .*/namespace: ${{ inputs.NAMESPACE }}-pr/' | kubectl apply -f -
+        echo "Deploying"
+        kubectl apply -k ${{ inputs.KUSTOMIZE_OVERLAY }}

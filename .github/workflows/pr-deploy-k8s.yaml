@@ -4,6 +4,14 @@ on:
   workflow_call:
 
     inputs:
+      PROJECT:
+        type: string
+        required: true
+        description: 'Project Name'
+      SERVICE:
+        type: string
+        required: true
+        description: 'Service Name'
       SLACK_PR_CHANNEL_ID:
         type: string
         required: true
@@ -108,9 +116,11 @@ jobs:
           PATTERN: $TAG 
 
       - name: Deploy PR
-        uses: hitch-technologies/gha-workflows/actions/deploy@main
+        uses: hitch-technologies/gha-workflows/actions/deploy-pr@main
         with:
           KUSTOMIZE_OVERLAY: ${{ inputs.KUSTOMIZE_OVERLAY }}
+          SERVICE: ${{ inputs.SERVICE }}
+          NAMESPACE: hitch-${{ inputs.PROJECT }}
 
       - name: Restart deployment
         if: github.event.action == 'synchronize'
