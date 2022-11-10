@@ -23,7 +23,7 @@ runs:
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
         echo "Syncing Secret"
-        kubectl get -o yaml secret ${{ inputs.SERVICE }} -n ${{ inputs.NAMESPACE }} | sed '/creationTimestamp\|resourceVersion\|uid:/d' | sed 's/namespace: .*/namespace: ${{ inputs.NAMESPACE }}-pr/' | kubectl apply -f -
+        kubectl get -o yaml secret ${{ inputs.SERVICE }} -n ${{ inputs.NAMESPACE }} | sed '/creationTimestamp\|resourceVersion/d' | sed 's/namespace: .*/namespace: ${{ inputs.NAMESPACE }}-pr/' | kubectl apply -f -
         kubectl get -o yaml configmap ${{ inputs.SERVICE }} -n ${{ inputs.NAMESPACE }} | sed '/creationTimestamp\|resourceVersion\|uid:/d' | sed 's/namespace: .*/namespace: ${{ inputs.NAMESPACE }}-pr/' | kubectl apply -f -
         echo "Deploying"
         kubectl apply -k ${{ inputs.KUSTOMIZE_OVERLAY }}
