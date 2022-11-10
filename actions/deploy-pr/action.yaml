@@ -22,8 +22,10 @@ runs:
         curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
+        echo "Setting up yq"
+        wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
         echo "Syncing Secret"
-        kubectl get -o yaml secret ${{ inputs.SERVICE }} -n ${{ inputs.NAMESPACE }} | sed '/creationTimestamp\|resourceVersion/d' | sed 's/namespace: .*/namespace: ${{ inputs.NAMESPACE }}-pr/' | kubectl apply -f -
-        kubectl get -o yaml configmap ${{ inputs.SERVICE }} -n ${{ inputs.NAMESPACE }} | sed '/creationTimestamp\|resourceVersion\|uid:/d' | sed 's/namespace: .*/namespace: ${{ inputs.NAMESPACE }}-pr/' | kubectl apply -f -
+        kubectl get -o yaml secret ${{ inputs.SERVICE }} -n ${{ inputs.NAMESPACE }} | yq 'del(.metadata.ownerReferences, .metadata.creationTimestamp, .metadata.resourceVersion, .metadata.uid )' | yq -e '.metadata.namespace = "${{ inputs.NAMESPACE }}-pr/"' | kubectl apply -f -
+        kubectl get -o yaml configmap ${{ inputs.SERVICE }} -n ${{ inputs.NAMESPACE }} | yq 'del(.metadata.ownerReferences, .metadata.creationTimestamp, .metadata.resourceVersion, .metadata.uid )' | yq -e '.metadata.namespace = "${{ inputs.NAMESPACE }}-pr/"' | kubectl apply -f -
         echo "Deploying"
         kubectl apply -k ${{ inputs.KUSTOMIZE_OVERLAY }}
