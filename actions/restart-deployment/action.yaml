@@ -5,10 +5,10 @@ inputs:
   KUSTOMIZE_ROOT:
     description: 'path to kustomize root'
     required: true
-  SERVICE_NAME:
+  SERVICE:
     description: 'path to kustomize root'
     required: true
-  SERVICE_NAMESPACE:
+  NAMESPACE:
     description: 'path to kustomize root'
     required: true
 
@@ -23,4 +23,4 @@ runs:
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
         cd ${{ inputs.KUSTOMIZE_ROOT }}/base
-        kubectl rollout restart deployment ${{ inputs.SERVICE_NAME }} -n ${{ inputs.SERVICE_NAMESPACE }}
+        kubectl rollout restart deployment ${{ inputs.SERVICE}} -n ${{ inputs.NAMESPACE }}

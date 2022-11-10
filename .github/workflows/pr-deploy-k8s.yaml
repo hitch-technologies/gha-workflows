@@ -127,6 +127,8 @@ jobs:
         uses: hitch-technologies/gha-workflows/actions/restart-deployment@main
         with:
           KUSTOMIZE_ROOT: ${{ inputs.KUSTOMIZE_ROOT }}
+          SERVICE: ${{ inputs.SERVICE }}
+          NAMESPACE: hitch-${{ inputs.PROJECT }}
 
       # TODO: Check if external-dns can offload this step
       # - name: "Create PR DNS Record "
