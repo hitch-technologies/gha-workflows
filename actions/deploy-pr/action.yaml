@@ -24,7 +24,7 @@ runs:
         sudo mv ./kubectl /usr/local/bin/kubectl
         echo "Setting up yq"
         curl -Lo yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-        chmod +x /yq
+        chmod +x ./yq
         sudo mv ./yq /usr/local/bin/yq
         echo "Syncing Secret and Configmap"
         kubectl get -o yaml secret ${{ inputs.SERVICE }} -n ${{ inputs.NAMESPACE }} | yq 'del(.metadata.ownerReferences, .metadata.creationTimestamp, .metadata.resourceVersion, .metadata.uid )' | yq -e '.metadata.namespace = "${{ inputs.NAMESPACE }}-pr/"' | kubectl apply -f -
