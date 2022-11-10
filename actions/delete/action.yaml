@@ -16,9 +16,5 @@ runs:
         curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
-        echo "Installing Kustomize"
-        curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
-        chmod +x ./kustomize
-        sudo mv ./kustomize /usr/local/bin/
-        echo "Deploying"
-        cd ${{ inputs.KUSTOMIZE_OVERLAY }} && kubectl delete -k .
+        echo "Deleting"
+        kubectl delete -k ${{ inputs.KUSTOMIZE_OVERLAY }}
