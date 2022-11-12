@@ -80,7 +80,7 @@ jobs:
       - name: Checkout cd-deployment repo
         uses: actions/checkout@v3
         with:
-          repository: hitch-technologies/cd-deployment
+          repository: hitch-technologies/cd-deployments
           token: ${{ secrets.gh-pat }}
           ref: main
 
