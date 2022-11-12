@@ -83,7 +83,6 @@ jobs:
           repository: hitch-technologies/cd-deployment
           token: ${{ secrets.gh-pat }}
           ref: main
-          path: cd-deployment
 
       - name: Setup Kustomize
         uses: imranismail/setup-kustomize@v1
