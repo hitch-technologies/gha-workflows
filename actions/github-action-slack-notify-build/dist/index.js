@@ -9448,15 +9448,15 @@ exports.getInput = getInput;
  * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-// function setOutput(name, value) {
-//     command_1.issueCommand('set-output', { name }, value);
-// }
-// exports.setOutput = setOutput;
-// /**
-//  * Enables or disables the echoing of commands into stdout for the rest of the step.
-//  * Echoing is disabled by default if ACTIONS_STEP_DEBUG is not set.
-//  *
-//  */
+function setOutput(name, value) {
+    command_1.issueCommand('set-output', { name }, value);
+}
+exports.setOutput = setOutput;
+/**
+ * Enables or disables the echoing of commands into stdout for the rest of the step.
+ * Echoing is disabled by default if ACTIONS_STEP_DEBUG is not set.
+ *
+ */
 // function setCommandEcho(enabled) {
 //     command_1.issue('echo', enabled ? 'on' : 'off');
 // }
