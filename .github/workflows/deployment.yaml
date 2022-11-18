@@ -64,7 +64,7 @@ jobs:
 
       - name: Notify Slack of Deployment
         id: gh-deploy-prod
-        uses: voxmedia/github-action-slack-notify-build@v1
+        uses: hitch-technologies/gha-workflows/actions/github-action-slack-notify-build@main
         with:
           channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           status: |
@@ -107,7 +107,7 @@ jobs:
 
       - name: Notify Slack of Success
         if: success()
-        uses: voxmedia/github-action-slack-notify-build@v1
+        uses: hitch-technologies/gha-workflows/actions/github-action-slack-notify-build@main
         with:
           channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
@@ -124,7 +124,7 @@ jobs:
 
       - name: Notify Slack of Failure
         if: failure()
-        uses: voxmedia/github-action-slack-notify-build@v1
+        uses: hitch-technologies/gha-workflows/actions/github-action-slack-notify-build@main
         with:
           channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}

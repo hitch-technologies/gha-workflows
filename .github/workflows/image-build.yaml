@@ -62,7 +62,7 @@ jobs:
 
       - name: Notify Slack of Build
         id: gh-build
-        uses: voxmedia/github-action-slack-notify-build@v1
+        uses: hitch-technologies/gha-workflows/actions/github-action-slack-notify-build@main
         with:
           channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
           message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
@@ -130,7 +130,7 @@ jobs:
 
       - name: Notify Slack of Success
         if: success()
-        uses: voxmedia/github-action-slack-notify-build@v1
+        uses: hitch-technologies/gha-workflows/actions/github-action-slack-notify-build@main
         with:
           channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
           message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
@@ -146,7 +146,7 @@ jobs:
 
       - name: Notify Slack of Failure
         if: failure()
-        uses: voxmedia/github-action-slack-notify-build@v1
+        uses: hitch-technologies/gha-workflows/actions/github-action-slack-notify-build@main
         with:
           channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
           message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
