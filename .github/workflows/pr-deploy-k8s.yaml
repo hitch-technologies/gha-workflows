@@ -156,7 +156,7 @@ jobs:
             - Run: ${{ env.RUN }}
             - Image Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
-            - PR URL: https://pr.hitch-dev.net/${{ inputs.SERVICE }}-${{ env.TAG }}
+            - PR URL: https://${{ env.TAG }}.hitch-dev.net/${{ inputs.SERVICE }}
             - Job URL: ${{ env.JOB_URL }}
           color: good
         env:
@@ -174,7 +174,7 @@ jobs:
             - Run: ${{ env.RUN }}
             - Image Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
-            - PR URL: https://pr.hitch-dev.net/${{ inputs.SERVICE }}-${{ env.TAG }}
+            - PR URL: https://${{ env.TAG }}.hitch-dev.net/${{ inputs.SERVICE }}
             - Job URL: ${{ env.JOB_URL }}
           color: danger
         env:
