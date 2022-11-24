@@ -92,14 +92,7 @@ jobs:
           PATTERN: $TAG 
 
       - name: Deploy Network
-        run: |
-          echo "Setting up KUBECTL"
-          curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-          chmod +x ./kubectl
-          sudo mv ./kubectl /usr/local/bin/kubectl
-          echo "Deploying"
-          find ./**/pr-network -type d -execdir kubectl apply -k . \;   
-        # uses: hitch-technologies/gha-workflows/actions/deploy-pr-network@main
+        uses: hitch-technologies/gha-workflows/actions/deploy-pr-network@main
       
       - name: Notify Slack of Success
         if: success()

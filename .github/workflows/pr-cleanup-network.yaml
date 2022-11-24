@@ -85,20 +85,8 @@ jobs:
       # This could be the subject of the next upgrade
       - name: Inject image tag into files
         run: |
-          sudo apt-get update -y
-          sudo apt-get install gettext -y
-          FILES=(
-            nestjs-services/apps/*/${{ inputs.PR_KUSTOMIZE_OVERLAY }}/*
-            services/*/${{ inputs.PR_KUSTOMIZE_OVERLAY }}/*
-          )
-          for FILE in ${FILES[@]}; do
-            if [[ -n ${PATTERN} ]] ; then
-              envsubst "${PATTERN}" < $FILE > /tmp/envsubst || exit 1
-            else
-              envsubst < $FILE > /tmp/envsubst || exit 1
-            fi
-            mv /tmp/envsubst $FILE || exit 1
-          done
+          find . -type f -name "ingress.yaml" -exec sed -i 's/$TAG/${{ env.TAG }}/g' {} \;
+          find . -type f -name "service.yaml" -exec sed -i 's/$TAG/${{ env.TAG }}/g' {} \;
         env:
           PATTERN: $TAG 
 
