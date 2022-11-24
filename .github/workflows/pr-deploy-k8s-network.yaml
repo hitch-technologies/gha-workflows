@@ -88,8 +88,8 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install gettext -y
           FILES=(
-            nestjs-services/apps/*/${{ inputs.PR_KUSTOMIZE_OVERLAY }}/*
-            services/*/${{ inputs.PR_KUSTOMIZE_OVERLAY }}/*
+            ./nestjs-services/apps/*/${{ inputs.PR_KUSTOMIZE_OVERLAY }}/* 
+            ./services/*/${{ inputs.PR_KUSTOMIZE_OVERLAY }}/*
           )
           for FILE in ${FILES[@]}; do
             if [[ -n ${PATTERN} ]] ; then
