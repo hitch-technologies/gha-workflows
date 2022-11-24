@@ -1,17 +1,9 @@
-name: "Deploy to dev k8s"
+name: "PR Cleanup workflow"
 
 on:
   workflow_call:
 
     inputs:
-      PROJECT:
-        type: string
-        required: true
-        description: 'Project Name'
-      SERVICE:
-        type: string
-        required: true
-        description: 'Service Name'
       SLACK_PR_DEPLOY_CHANNEL_ID:
         type: string
         required: true
@@ -23,7 +15,7 @@ on:
       KUSTOMIZE_ROOT:
         type: string
         required: true
-        description: 'Path to Kustomize base'
+        description: 'Path to Kustomize root'
       HOSTED_ZONE_ID_INT:
         type: string
         required: true
@@ -55,12 +47,11 @@ jobs:
     runs-on: small-runner
     outputs:
       TAG: ${{ env.TAG }}
-      RUN: ${{ env.RUN }}
+      SLACK_MESSAGE_ID: ${{ steps.gh-cleanup-dev.outputs.message_id }}
       GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
-
+      
     steps:
       - name: Set environment variables
-        id: envs
         run: |
           RUN=pr-${{ github.event.number }}-${{ github.run_number }}
           TAG=pr-${{ github.event.number }}
@@ -75,30 +66,27 @@ jobs:
           username: ${{ secrets.dockerhub-username }}
           password: ${{ secrets.dockerhub-token }}
 
-      - name: Notify Slack of Deploy
-        id: gh-deploy-dev
+      - name: Notify Slack of Cleanup
+        id: gh-cleanup-dev
         uses: hitch-technologies/gha-workflows/actions/github-action-slack-notify-build@main
         with:
           channel_id: ${{ inputs.SLACK_PR_DEPLOY_CHANNEL_ID }}
           status: |
-            Deploying PR Image on DEV
+            ${{ env.TAG }} closed. Recycling...
 
             - Run: ${{ env.RUN }}
             - Image Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
-          color: 0037FF
+          color: warning
         env:
           SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
-
+          
       - name: Checkout
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-
-      # This step causes issues when used as a composite action
-      # Therefore the Script is executed from the step directly
-      # This could be the subject of the next upgrade
+                
       - name: Inject image tag into files
         run: |
           sudo apt-get update -y
@@ -115,34 +103,23 @@ jobs:
         env:
           PATTERN: $TAG 
 
-      - name: Deploy PR
-        uses: hitch-technologies/gha-workflows/actions/deploy-pr@main
+      - name: Delete PR from cluster
+        uses: hitch-technologies/gha-workflows/actions/delete@main
         with:
           KUSTOMIZE_OVERLAY: ${{ inputs.KUSTOMIZE_OVERLAY }}
-          SERVICE: ${{ inputs.SERVICE }}
-          NAMESPACE: hitch-${{ inputs.PROJECT }}
 
-      - name: Restart deployment
-        if: github.event.action == 'synchronize'
-        uses: hitch-technologies/gha-workflows/actions/restart-deployment@main
-        with:
-          KUSTOMIZE_ROOT: ${{ inputs.KUSTOMIZE_ROOT }}
-          SERVICE: ${{ inputs.SERVICE }}
-          NAMESPACE: hitch-${{ inputs.PROJECT }}
-      
       - name: Notify Slack of Success
         if: success()
         uses: hitch-technologies/gha-workflows/actions/github-action-slack-notify-build@main
         with:
           channel_id: ${{ inputs.SLACK_PR_DEPLOY_CHANNEL_ID }}
-          message_id: ${{ steps.gh-deploy-dev.outputs.message_id }}
+          message_id: ${{ steps.gh-cleanup-dev.outputs.message_id }}
           status: |
-            PR Deployed on DEV
+            ${{ env.TAG }} closed and recycled
 
             - Run: ${{ env.RUN }}
             - Image Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
-            - PR URL: https://${{ env.TAG }}.hitch-dev.net/${{ inputs.SERVICE }}
             - Job URL: ${{ env.JOB_URL }}
           color: good
         env:
@@ -153,14 +130,13 @@ jobs:
         uses: hitch-technologies/gha-workflows/actions/github-action-slack-notify-build@main
         with:
           channel_id: ${{ inputs.SLACK_PR_DEPLOY_CHANNEL_ID }}
-          message_id: ${{ steps.gh-deploy-dev.outputs.message_id }}
+          message_id: ${{ steps.gh-cleanup-dev.outputs.message_id }}
           status: |
-            PR Deployment Failed 
+            ${{ env.TAG }} closed. Recycling failed
 
             - Run: ${{ env.RUN }}
             - Image Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
-            - PR URL: https://${{ env.TAG }}.hitch-dev.net/${{ inputs.SERVICE }}
             - Job URL: ${{ env.JOB_URL }}
           color: danger
         env:

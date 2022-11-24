@@ -1,33 +1,25 @@
-name: "PR Cleanup workflow"
+name: "Cleanup PR Networking"
 
 on:
   workflow_call:
 
     inputs:
+      SLACK_PR_MESSAGE_ID:
+        type: string
+        required: true
+        description: 'Initital Message'
       SLACK_PR_DEPLOY_CHANNEL_ID:
         type: string
         required: true
         description: '#gh-deploy-dev ID'
-      KUSTOMIZE_OVERLAY:
+      PR_KUSTOMIZE_OVERLAY:
         type: string
         required: true
         description: 'Path to Kustomize overlay'
-      KUSTOMIZE_ROOT:
+      PR_KUSTOMIZE_ROOT:
         type: string
         required: true
-        description: 'Path to Kustomize root'
-      HOSTED_ZONE_ID_INT:
-        type: string
-        required: true
-        description: 'R53 Hosted Zone ID'
-      DOMAIN_INT:
-        type: string
-        required: true
-        description: 'internal dev domain'
-      DOMAIN_INT_ELB:
-        type: string
-        required: true
-        description: 'internal dev elb'
+        description: 'Path to Kustomize base'
     secrets:
       slack-bot-token:
         required: true
@@ -47,11 +39,12 @@ jobs:
     runs-on: small-runner
     outputs:
       TAG: ${{ env.TAG }}
-      SLACK_MESSAGE_ID: ${{ steps.gh-cleanup-dev.outputs.message_id }}
+      RUN: ${{ env.RUN }}
       GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
-      
+
     steps:
       - name: Set environment variables
+        id: envs
         run: |
           RUN=pr-${{ github.event.number }}-${{ github.run_number }}
           TAG=pr-${{ github.event.number }}
@@ -67,31 +60,37 @@ jobs:
           password: ${{ secrets.dockerhub-token }}
 
       - name: Notify Slack of Cleanup
-        id: gh-cleanup-dev
+        id: gh-deploy-dev
         uses: hitch-technologies/gha-workflows/actions/github-action-slack-notify-build@main
         with:
           channel_id: ${{ inputs.SLACK_PR_DEPLOY_CHANNEL_ID }}
           status: |
-            ${{ env.TAG }} closed. Recycling...
+            Cleaning PR Network
 
             - Run: ${{ env.RUN }}
-            - Image Tag: ${{ env.TAG }}
+            - PR Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
-          color: warning
+          color: 0037FF
         env:
           SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
-          
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-                
+
+      # This step causes issues when used as a composite action
+      # Therefore the Script is executed from the step directly
+      # This could be the subject of the next upgrade
       - name: Inject image tag into files
         run: |
           sudo apt-get update -y
           sudo apt-get install gettext -y
-          FILES=(${{ inputs.KUSTOMIZE_ROOT }}/base/* ${{ inputs.KUSTOMIZE_ROOT }}/overlays/dev/*)
+          FILES=(
+            nestjs-services/apps/*/${{ inputs.PR_KUSTOMIZE_OVERLAY }}/*
+            services/*/${{ inputs.PR_KUSTOMIZE_OVERLAY }}/*
+          )
           for FILE in ${FILES[@]}; do
             if [[ -n ${PATTERN} ]] ; then
               envsubst "${PATTERN}" < $FILE > /tmp/envsubst || exit 1
@@ -103,22 +102,20 @@ jobs:
         env:
           PATTERN: $TAG 
 
-      - name: Delete PR from cluster
-        uses: hitch-technologies/gha-workflows/actions/delete@main
-        with:
-          KUSTOMIZE_OVERLAY: ${{ inputs.KUSTOMIZE_OVERLAY }}
-
+      - name: Delete Network
+        uses: hitch-technologies/gha-workflows/actions/delete-pr-network@main
+      
       - name: Notify Slack of Success
         if: success()
         uses: hitch-technologies/gha-workflows/actions/github-action-slack-notify-build@main
         with:
           channel_id: ${{ inputs.SLACK_PR_DEPLOY_CHANNEL_ID }}
-          message_id: ${{ steps.gh-cleanup-dev.outputs.message_id }}
+          message_id: ${{ steps.gh-deploy-dev.outputs.message_id }}
           status: |
-            ${{ env.TAG }} closed and recycled
+            PR Network Deployed
 
             - Run: ${{ env.RUN }}
-            - Image Tag: ${{ env.TAG }}
+            - PR Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: good
@@ -130,12 +127,12 @@ jobs:
         uses: hitch-technologies/gha-workflows/actions/github-action-slack-notify-build@main
         with:
           channel_id: ${{ inputs.SLACK_PR_DEPLOY_CHANNEL_ID }}
-          message_id: ${{ steps.gh-cleanup-dev.outputs.message_id }}
+          message_id: ${{ steps.gh-deploy-dev.outputs.message_id }}
           status: |
-            ${{ env.TAG }} closed. Recycling failed
+            PR Network Deployment Failed
 
             - Run: ${{ env.RUN }}
-            - Image Tag: ${{ env.TAG }}
+            - PR Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: danger
