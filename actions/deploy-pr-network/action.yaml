@@ -7,11 +7,9 @@ runs:
     - name: install kubectl, deploy network
       shell: bash
       run: |
-        ls
-        echo $(pwd)
         echo "Setting up KUBECTL"
         curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
         echo "Deploying"
-        find ./ -name pr-network -type d -execdir kubectl apply -k . \;    
+        find ./ -name pr-network -type d -execdir kubectl apply -k ./pr-network \;    
