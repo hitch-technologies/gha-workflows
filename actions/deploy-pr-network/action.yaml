@@ -12,4 +12,4 @@ runs:
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
         echo "Deploying"
-        find ./**/pr-network -type d -execdir kubectl apply -k . \;    
+        find **/pr-network -type d -execdir kubectl apply -k . \;    
