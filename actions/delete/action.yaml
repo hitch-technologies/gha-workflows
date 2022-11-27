@@ -5,6 +5,9 @@ inputs:
   KUSTOMIZE_OVERLAY:
     description: 'path to kustomize overlay'
     required: true
+  KUSTOMIZE_ROOT:
+    description: 'path to kustomize root'
+    required: true
 
 runs:
   using: "composite"

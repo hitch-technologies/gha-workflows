@@ -107,6 +107,7 @@ jobs:
         uses: hitch-technologies/gha-workflows/actions/delete@main
         with:
           KUSTOMIZE_OVERLAY: ${{ inputs.KUSTOMIZE_OVERLAY }}
+          KUSTOMIZE_ROOT: ${{ inputs.KUSTOMIZE_ROOT }}
 
       - name: Notify Slack of Success
         if: success()
