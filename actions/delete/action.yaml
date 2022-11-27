@@ -16,7 +16,7 @@ runs:
         curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
-        echo "Removing service.yaml from kustomization"
-        sed -i '/service.yaml/d' ${{ inputs.KUSTOMIZE_OVERLAY }}/kustomization.yaml
+        echo "Removing service.yaml from root  kustomization"
+        sed -i '/service.yaml/d' ${{ inputs.KUSTOMIZE_ROOT }}/base/kustomization.yaml
         echo "Deleting"
         kubectl delete -k ${{ inputs.KUSTOMIZE_OVERLAY }}
