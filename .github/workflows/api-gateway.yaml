@@ -63,11 +63,7 @@ jobs:
         with:
           channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           status: |
-            Deploying Image on Development
-
-            - Image Tag: ${{ env.TAG }}
-            - Actor: ${{ env.GITHUB_ACTOR }}
-            - Job URL: ${{ env.JOB_URL }}
+            Deploying KrakenD configuration
           color: 0037FF
         env:
           SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
