@@ -36,6 +36,10 @@ on:
         type: string
         required: true
         description: 'internal dev elb'
+      ECR_REPO:
+        type: string
+        required: true
+        description: 'Elastic Container Repository of the service'
     secrets:
       slack-bot-token:
         required: true
@@ -96,9 +100,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      # This step causes issues when used as a composite action
-      # Therefore the Script is executed from the step directly
-      # This could be the subject of the next upgrade
       - name: Inject image tag into files
         run: |
           sudo apt-get update -y
@@ -114,6 +115,30 @@ jobs:
           done
         env:
           PATTERN: $TAG 
+
+      - name: Download GQL Scheme
+        uses: actions/download-artifact@v3
+        with:
+          path: .
+          name: ${{ inputs.ECR_REPO }}-gql-scheme
+          if-no-files-found: warn
+
+      - name: Install Rover
+        run: |
+          curl -sSL https://rover.apollo.dev/nix/v0.1.0 | sh
+
+          # Add Rover to the $GITHUB_PATH so it can be used in another step
+          echo "$HOME/.rover/bin" >> $GITHUB_PATH
+
+      - name: Run Schema check against staging
+        env:
+          APOLLO_KEY: ${{ secrets.GATEWAY_SERVICE_APOLLO_KEY }}
+          APOLLO_VCS_COMMIT: ${{ github.event.pull_request.head.sha }}
+        run: |
+          rover subgraph publish Supergraph-nsal4s@{{ env.TAG }} \
+          --schema "./src/gql/schema.graphql" \
+          --name ${{ inputs.ECR_REPO }} \
+          --routing-url "${{ inputs.SERVICE }}/graphql"
 
       - name: Deploy PR
         uses: hitch-technologies/gha-workflows/actions/deploy-pr@main
