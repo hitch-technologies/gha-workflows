@@ -119,21 +119,6 @@ jobs:
           push: true
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ECR_REPO }}:${{ env.TAG }}
-      
-      - name: Extract scheme.graphql
-        uses: shrink/actions-docker-extract@v1
-        if: always()
-        id: extract
-        with:
-          image: '${{ steps.login-ecr.outputs.registry }}/${{ inputs.ECR_REPO }}:${{ env.TAG }}'
-          path: './src/gql/scheme.graphql'
-
-      - name: Upload GQL Scheme
-        uses: actions/upload-artifact@v3
-        with:
-          path: ${{ steps.extract.outputs.destination }}
-          name: ${{ inputs.ECR_REPO }}-gql-scheme
-          if-no-files-found: warn
 
       - name: Create Git Tag
         uses: rickstaa/action-create-tag@v1
