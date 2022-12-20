@@ -97,6 +97,8 @@ jobs:
           git config --global user.email "devops@hitch.net"
           git config --global user.name "Hitch-DevOps"
           git commit -am "New Deploy ${{ env.TAG }} by ${{ env.GITHUB_ACTOR }}"
+          git remote set-url origin https://{{ secrets.gh-pat }}@github.com/hitch-technologies/cd-deployments.git
+          git pull
 
       - name: Push changes
         uses: ad-m/github-push-action@master
