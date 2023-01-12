@@ -54,7 +54,7 @@ jobs:
     steps:
       - name: Set environment variables
         run: |
-          echo "TAG=${{ inputs.IMAGE_TAG }} >> $GITHUB_ENV
+          echo "TAG=${{ inputs.IMAGE_TAG }}" >> $GITHUB_ENV
           echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
           echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
 
