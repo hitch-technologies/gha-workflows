@@ -54,8 +54,6 @@ jobs:
     steps:
       - name: Set environment variables
         run: |
-          echo "SHORT_COMMIT=`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
-          echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
           echo "TAG=${{ inputs.IMAGE_TAG }} >> $GITHUB_ENV
           echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
           echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
@@ -81,27 +79,36 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
 
-      - name: Check out code
+      - name: Checkout cd-deployment repo
         uses: actions/checkout@v3
         with:
-          repository: ${{ inputs.DEPLOYMENT_REPO }}
+          repository: hitch-technologies/cd-deployments
           token: ${{ secrets.gh-pat }}
           ref: main
+
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v1
 
       - name: Update Kubernetes resources
         run: |
           cd ${{ inputs.KUSTOMIZE }}
-          kustomize edit set image ${{ inputs.ECR_FULL_PATH }}:OLD_TAG=${{ inputs.ECR_FULL_PATH }}:$TAG
+          kustomize edit set image ${{ inputs.ECR_FULL_PATH }}:OLD_TAG=${{ inputs.ECR_FULL_PATH }}:${{ env.TAG }}
           
       - name: Commit files
         run: |
-          git commit -am "New Deploy $TAG"
+          git config --global user.email "devops@hitch.net"
+          git config --global user.name "Hitch-DevOps"
+          git commit -am "New Deploy ${{ env.TAG }} by ${{ env.GITHUB_ACTOR }}"
+          #TODO: Check this for fixing multiple services deploying at the same time
+          # git remote set-url origin https://{{ secrets.gh-pat }}@github.com/hitch-technologies/cd-deployments.git
+          # git pull
 
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           repository: ${{ inputs.DEPLOYMENT_REPO }}
           github_token: ${{ secrets.gh-pat }}
+          branch: main
 
       - name: Notify Slack of Success
         if: success()
