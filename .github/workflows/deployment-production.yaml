@@ -52,6 +52,15 @@ jobs:
       GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
 
     steps:
+      - name: Check image tag 
+        run: | 
+          if [[ ! ${{ inputs.IMAGE_TAG }} =~ ^[a-z]+[-] ]] ; then 
+            echo 'Invalid Image Tag'
+            echo 'must be in {BRANCH_NAME}-{SHA} format'
+            echo 'etc: master-2b7f922'
+            exit 1
+          fi
+
       - name: Set environment variables
         run: |
           echo "TAG=${{ inputs.IMAGE_TAG }}" >> $GITHUB_ENV
