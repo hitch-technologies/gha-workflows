@@ -54,9 +54,9 @@ jobs:
     steps:
       - name: Check image tag 
         run: | 
-          if [[ ! ${{ inputs.IMAGE_TAG }} =~ ^[a-z]+[-] ]] ; then 
+          if [[ ! ${{ inputs.IMAGE_TAG }} =~ ^([a-z0-9_]+)-([a-z0-9]{7})$ ]] ; then 
             echo 'Invalid Image Tag'
-            echo 'must be in {BRANCH_NAME}-{SHA} format'
+            echo 'must be in {BRANCH_NAME}-{SHORT_SHA} format'
             echo 'etc: master-2b7f922'
             exit 1
           fi
