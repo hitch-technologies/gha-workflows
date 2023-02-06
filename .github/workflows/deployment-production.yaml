@@ -112,7 +112,7 @@ jobs:
           git remote set-url origin https://${{ secrets.gh-pat }}@github.com/hitch-technologies/cd-deployments.git
           git pull --autostash --rebase -X ours
 
-      - name: Commit files
+      - name: Sleep on failure
         if: ${{ failure() }}
         run: |
           sleep .$[ ( $RANDOM % 10 ) + 1 ]s
