@@ -108,9 +108,8 @@ jobs:
           git config --global user.email "devops@hitch.net"
           git config --global user.name "Hitch-DevOps"
           git commit -am "New Deploy ${{ env.TAG }} by ${{ env.GITHUB_ACTOR }}"
-          #TODO: Check this for fixing multiple services deploying at the same time
-          # git remote set-url origin https://{{ secrets.gh-pat }}@github.com/hitch-technologies/cd-deployments.git
-          # git pull
+          git remote set-url origin https://${{ secrets.gh-pat }}@github.com/hitch-technologies/cd-deployments.git
+          git pull
 
       - name: Push changes
         uses: ad-m/github-push-action@master
