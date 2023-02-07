@@ -91,7 +91,7 @@ jobs:
           
       - name: Commit files
         run: |
-          cd ./kubernetes-resources
+          cd ./${{ inputs.TARGET_PATH }}
           git config --global user.email "devops@hitch.net"
           git config --global user.name "Hitch-DevOps"
           git commit -am "New KrakenD Configuration"
