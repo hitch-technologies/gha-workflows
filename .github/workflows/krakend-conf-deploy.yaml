@@ -87,6 +87,7 @@ jobs:
       - name: Copy the configmap
         shell:  bash {0}
         run: |
+          echo 'PWD: ${pwd}'
           cp ./${{ inputs.SOURCE_PATH }}/api-gateway/${{ inputs.ENV_FOLDER }}/configmap.yaml ./${{ inputs.TARGET_PATH }}/services/krakend/${{ inputs.KUSTOMIZE }}/configmap.yaml
           
       - name: Commit files
