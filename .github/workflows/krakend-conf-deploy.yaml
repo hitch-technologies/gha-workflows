@@ -73,7 +73,7 @@ jobs:
         with:
           repository: ${{ inputs.SOURCE_REPO }}
           token: ${{ secrets.gh-pat }}
-          ref: new_hitch
+          ref: main
           path: ${{ inputs.SOURCE_PATH }}
 
       - name: Checkout kubernetes-resources repo
