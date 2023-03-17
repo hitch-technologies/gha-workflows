@@ -119,7 +119,7 @@ jobs:
           APOLLO_KEY: ${{ secrets.GATEWAY_SERVICE_APOLLO_KEY }}
           APOLLO_VCS_COMMIT: ${{ github.event.pull_request.head.sha }}
         run: |
-          rover subgraph publish Supergraph-nsal4s@Development \
+          rover subgraph publish Supergraph-nsal4s@development \
           --schema "${{ steps.extract.outputs.destination }}" \
           --name ${{ inputs.ECR_REPO }} \
           --routing-url "https://${{ inputs.SERVICE }}/graphql"

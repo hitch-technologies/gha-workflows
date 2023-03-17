@@ -49,7 +49,7 @@ jobs:
     steps:
       - name: Set environment variables
         run: |
-          echo "TAG=pr-${{ github.event.number }}" >> $GITHUB_ENV
+          echo "TAG=pr-${{ github.event.number }}-`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
           echo "RUN=pr-${{ github.event.number }}-${{ github.run_number }}" >> $GITHUB_ENV
           echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
           echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
