@@ -42,15 +42,15 @@ jobs:
   workflow:
     runs-on: small-runner
     outputs:
-      TAG: ${{ env.TAG }}
-      RUN: ${{ env.RUN }}
+      PR_TAG: ${{ env.PR_TAG }}
+      IMAGE_TAG: ${{ env.IMAGE_TAG }}
       GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
       
     steps:
       - name: Set environment variables
         run: |
-          echo "TAG=pr-${{ github.event.number }}-`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
-          echo "RUN=pr-${{ github.event.number }}-${{ github.run_number }}" >> $GITHUB_ENV
+          echo "PR_TAG=pr-${{ github.event.number }}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=pr-${{ github.event.number }}-${{ github.run_number }}" >> $GITHUB_ENV
           echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
           echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
 
@@ -69,8 +69,9 @@ jobs:
           status: |
             Starting PR Image Build
 
-            - Run: ${{ env.RUN }}
-            - Image Tag: ${{ env.TAG }}
+            - Pull Request: ${{ github.event.number }}
+            - Run: ${{ github.run_number }}
+            - Image Tag: ${{ env.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: 0037FF
@@ -115,7 +116,7 @@ jobs:
           file: ${{ inputs.DOCKERFILE_PATH }}/Dockerfile_new
           push: true
           TAGs: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ECR_REPO }}:${{ env.TAG }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ECR_REPO }}:${{ env.IMAGE_TAG }}
 
       - name: Notify Slack of Success
         if: success()
@@ -125,9 +126,10 @@ jobs:
           message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
           status: |
             PR Image Build Completed
-
-            - Run: ${{ env.RUN }}
-            - Image Tag: ${{ env.TAG }}
+            
+            - Pull Request: ${{ github.event.number }}
+            - Run: ${{ github.run_number }}
+            - Image Tag: ${{ env.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: good
@@ -143,8 +145,9 @@ jobs:
           status: |
             PR Image Build Failed
 
-            - Run: ${{ env.RUN }}
-            - Image Tag: ${{ env.TAG }}
+            - Pull Request: ${{ github.event.number }}
+            - Run: ${{ github.run_number }}
+            - Image Tag: ${{ env.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: danger

@@ -66,10 +66,10 @@ jobs:
       - name: Set environment variables
         id: envs
         run: |
-          RUN=pr-${{ github.event.number }}-${{ github.run_number }}
-          TAG=pr-${{ github.event.number }}-`echo ${GITHUB_SHA} | cut -c1-7`
-          echo "TAG=pr-${{ github.event.number }}-`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
-          echo "RUN=pr-${{ github.event.number }}-${{ github.run_number }}" >> $GITHUB_ENV
+          PR_TAG=pr-${{ github.event.number }}
+          IMAGE_TAG=pr-${{ github.event.number }}-${{ github.run_number }}
+          echo "PR_TAG=pr-${{ github.event.number }}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=pr-${{ github.event.number }}-${{ github.run_number }}" >> $GITHUB_ENV
           echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
           echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
 
@@ -87,8 +87,9 @@ jobs:
           status: |
             Deploying PR Image on DEV
 
-            - Run: ${{ env.RUN }}
-            - Image Tag: ${{ env.TAG }}
+            - Pull Request: ${{ github.event.number }}
+            - Run: ${{ github.run_number }}
+            - Image Tag: ${{ env.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: 0037FF
@@ -114,7 +115,23 @@ jobs:
             mv /tmp/envsubst $FILE || exit 1
           done
         env:
-          PATTERN: $TAG 
+          PATTERN: $IMAGE_TAG 
+
+      - name: Inject pr tag into files
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install gettext -y
+          FILES=(${{ inputs.KUSTOMIZE_ROOT }}/base/* ${{ inputs.KUSTOMIZE_ROOT }}/overlays/dev/*)
+          for FILE in ${FILES[@]}; do
+            if [[ -n ${PATTERN} ]] ; then
+              envsubst "${PATTERN}" < $FILE > /tmp/envsubst || exit 1
+            else
+              envsubst < $FILE > /tmp/envsubst || exit 1
+            fi
+            mv /tmp/envsubst $FILE || exit 1
+          done
+        env:
+          PATTERN: $PR_TAG 
 
       - name: Deploy PR
         uses: hitch-technologies/gha-workflows/actions/deploy-pr@main
@@ -140,10 +157,11 @@ jobs:
           status: |
             PR Deployed on DEV
 
-            - Run: ${{ env.RUN }}
-            - Image Tag: ${{ env.TAG }}
+            - Pull Request: ${{ github.event.number }}
+            - Run: ${{ github.run_number }}
+            - Image Tag: ${{ env.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
-            - PR URL: https://${{ env.TAG }}.hitch-dev.net/${{ inputs.SERVICE }}
+            - PR URL: https://${{ env.PR_TAG }}.hitch-dev.net/${{ inputs.SERVICE }}
             - Job URL: ${{ env.JOB_URL }}
           color: good
         env:
@@ -158,10 +176,11 @@ jobs:
           status: |
             PR Deployment Failed 
 
-            - Run: ${{ env.RUN }}
-            - Image Tag: ${{ env.TAG }}
+            - Pull Request: ${{ github.event.number }}
+            - Run: ${{ github.run_number }}
+            - Image Tag: ${{ env.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
-            - PR URL: https://${{ env.TAG }}.hitch-dev.net/${{ inputs.SERVICE }}
+            - PR URL: https://${{ env.PR_TAG }}.hitch-dev.net/${{ inputs.SERVICE }}
             - Job URL: ${{ env.JOB_URL }}
           color: danger
         env:
