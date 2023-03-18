@@ -113,7 +113,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ${{ inputs.DOCKER_CONTEXT }}
-          file: ${{ inputs.DOCKERFILE_PATH }}/Dockerfile_new
+          file: ${{ inputs.DOCKERFILE_PATH }}/Dockerfile
           push: true
           TAGs: |
             ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ECR_REPO }}:${{ env.IMAGE_TAG }}
