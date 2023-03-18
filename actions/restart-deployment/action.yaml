@@ -23,4 +23,4 @@ runs:
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
         cd ${{ inputs.KUSTOMIZE_ROOT }}/base
-        kubectl rollout restart deployment ${{ inputs.SERVICE }}-${{ env.TAG }} -n ${{ inputs.NAMESPACE }}-pr
+        kubectl rollout restart deployment ${{ inputs.SERVICE }}-${{ env.IMAGE_TAG }} -n ${{ inputs.NAMESPACE }}-pr
