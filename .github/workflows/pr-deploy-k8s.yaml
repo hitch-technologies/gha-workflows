@@ -58,8 +58,8 @@ jobs:
   workflow:
     runs-on: small-runner
     outputs:
-      TAG: ${{ env.TAG }}
-      RUN: ${{ env.RUN }}
+      PR_TAG: ${{ env.PR_TAG }}
+      IMAGE_TAG: ${{ env.IMAGE_TAG }}
       GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
 
     steps:

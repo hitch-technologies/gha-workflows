@@ -46,17 +46,18 @@ jobs:
   workflow:
     runs-on: small-runner
     outputs:
-      TAG: ${{ env.TAG }}
+      PR_TAG: ${{ env.PR_TAG }}
+      IMAGE_TAG: ${{ env.IMAGE_TAG }}
       SLACK_MESSAGE_ID: ${{ steps.gh-cleanup-dev.outputs.message_id }}
       GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
       
     steps:
       - name: Set environment variables
         run: |
-          RUN=pr-${{ github.event.number }}-${{ github.run_number }}
-          TAG=pr-${{ github.event.number }}
-          echo "TAG=pr-${{ github.event.number }}" >> $GITHUB_ENV
-          echo "RUN=pr-${{ github.event.number }}-${{ github.run_number }}" >> $GITHUB_ENV
+          PR_TAG=pr-${{ github.event.number }}
+          IMAGE_TAG=pr-${{ github.event.number }}-${{ github.run_number }}
+          echo "PR_TAG=pr-${{ github.event.number }}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=pr-${{ github.event.number }}-${{ github.run_number }}" >> $GITHUB_ENV
           echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
           echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
 
@@ -72,10 +73,9 @@ jobs:
         with:
           channel_id: ${{ inputs.SLACK_PR_DEPLOY_CHANNEL_ID }}
           status: |
-            ${{ env.TAG }} closed. Recycling...
+            PR ${{ github.event.number }} closed. Recycling...
 
-            - Run: ${{ env.RUN }}
-            - Image Tag: ${{ env.TAG }}
+            - Image Tag: ${{ env.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: warning
@@ -86,7 +86,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-                
+
       - name: Inject image tag into files
         run: |
           sudo apt-get update -y
@@ -101,7 +101,23 @@ jobs:
             mv /tmp/envsubst $FILE || exit 1
           done
         env:
-          PATTERN: $TAG 
+          PATTERN: $IMAGE_TAG 
+
+      - name: Inject pr tag into files
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install gettext -y
+          FILES=(${{ inputs.KUSTOMIZE_ROOT }}/base/* ${{ inputs.KUSTOMIZE_ROOT }}/overlays/dev/*)
+          for FILE in ${FILES[@]}; do
+            if [[ -n ${PATTERN} ]] ; then
+              envsubst "${PATTERN}" < $FILE > /tmp/envsubst || exit 1
+            else
+              envsubst < $FILE > /tmp/envsubst || exit 1
+            fi
+            mv /tmp/envsubst $FILE || exit 1
+          done
+        env:
+          PATTERN: $PR_TAG 
 
       - name: Delete PR from cluster
         uses: hitch-technologies/gha-workflows/actions/delete@main
@@ -116,10 +132,9 @@ jobs:
           channel_id: ${{ inputs.SLACK_PR_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-cleanup-dev.outputs.message_id }}
           status: |
-            ${{ env.TAG }} closed and recycled
+            PR ${{ github.event.number }} closed and recycled
 
-            - Run: ${{ env.RUN }}
-            - Image Tag: ${{ env.TAG }}
+            - Image Tag: ${{ env.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: good
@@ -133,10 +148,9 @@ jobs:
           channel_id: ${{ inputs.SLACK_PR_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-cleanup-dev.outputs.message_id }}
           status: |
-            ${{ env.TAG }} closed. Recycling failed
+           PR ${{ github.event.number }} closed. Recycling failed
 
-            - Run: ${{ env.RUN }}
-            - Image Tag: ${{ env.TAG }}
+            - Image Tag: ${{ env.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: danger
