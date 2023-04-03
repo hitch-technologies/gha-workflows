@@ -54,7 +54,7 @@ jobs:
 
       - name: Notify Slack of Check
         id: gh-build
-        uses: FlexCharge/github-action-slack-notify-build@f953c3e
+        uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
         with:
           channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
           message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
@@ -91,7 +91,7 @@ jobs:
 
       - name: Notify Slack of Success
         if: success()
-        uses: FlexCharge/github-action-slack-notify-build@f953c3e
+        uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
         with:
           channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
           message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
@@ -106,7 +106,7 @@ jobs:
 
       - name: Notify Slack of Failure
         if: failure()
-        uses: FlexCharge/github-action-slack-notify-build@f953c3e
+        uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
         with:
           channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
           message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
