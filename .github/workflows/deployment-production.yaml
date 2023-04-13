@@ -46,6 +46,12 @@ jobs:
       GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
 
     steps:
+      - name: Set environment variables
+        run: |
+          echo "TAG=${{ inputs.IMAGE_TAG }}" >> $GITHUB_ENV
+          echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
+          echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
+
       - name: Check image tag 
         run: | 
           if [[ ! ${{ inputs.IMAGE_TAG }} =~ ^([a-z0-9_]+)-([a-z0-9]{7})$ ]] ; then 
@@ -55,11 +61,25 @@ jobs:
             exit 1
           fi
 
-      - name: Set environment variables
-        run: |
-          echo "TAG=${{ inputs.IMAGE_TAG }}" >> $GITHUB_ENV
-          echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
-          echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
+      - name: Notify Slack of Failure
+        if: failure()
+        uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
+        with:
+          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
+          message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
+          status: |
+            Incorect image tag format !
+            Deployment Aborted !
+
+            Follow the description in the
+            deployment GHA trigger !
+            
+            - Image Tag: ${{ inputs.IMAGE_TAG }}
+            - Actor: ${{ env.GITHUB_ACTOR }}
+            - Job URL: ${{ env.JOB_URL }}
+          color: danger
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2.1.0
