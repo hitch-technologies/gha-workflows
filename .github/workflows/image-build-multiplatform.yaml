@@ -93,6 +93,9 @@ jobs:
       - name: Install AWS cli
         id: install-aws-cli
         uses: unfor19/install-aws-cli-action@v1
+        with:
+          version: 2
+          arch: arm64
 
       - name: ECR repo setup
         uses: hitch-technologies/gha-workflows/actions/ecr-setup@main
