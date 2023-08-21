@@ -40,7 +40,7 @@ on:
         
 jobs:
   workflow:
-    runs-on: small-runner-arm64
+    runs-on: small-runner
     outputs:
       TAG: ${{ env.TAG }}
       GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
@@ -50,7 +50,7 @@ jobs:
         run: |
           echo "SHORT_COMMIT=`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
           echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
-          echo "TAG=${GITHUB_REF##*/}-`echo ${GITHUB_SHA} | cut -c1-7`-arm64" >> $GITHUB_ENV
+          echo "TAG=${GITHUB_REF##*/}-`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
           echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
           echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
 
@@ -93,9 +93,6 @@ jobs:
       - name: Install AWS cli
         id: install-aws-cli
         uses: unfor19/install-aws-cli-action@v1
-        with:
-          arch: arm64
-
 
       - name: ECR repo setup
         uses: hitch-technologies/gha-workflows/actions/ecr-setup@main
@@ -118,7 +115,6 @@ jobs:
         uses: docker/build-push-action@v4.0.0
         with:
           context: ${{ inputs.DOCKER_CONTEXT }}
-          platforms: linux/arm64
           file: ${{ inputs.DOCKERFILE_PATH }}/Dockerfile
           push: true
           tags: |
