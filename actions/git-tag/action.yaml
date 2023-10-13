@@ -5,8 +5,11 @@ inputs:
   TAG_NAME:
     description: 'desired tag name'
     required: true
-  TAG_MESSAGE:
-    description: 'desired tag message'
+  GIT_USER:
+    description: 'desired tag name'
+    required: true
+  GIT_USER_EMAIL:
+    description: 'desired tag name'
     required: true
 
 runs:
@@ -16,5 +19,8 @@ runs:
       shell: bash
       run: |
         # Create the tag
-        git tag -a "${{ inputs.TAG_NAME }}" -m "${{ inputs.TAG_MESSAGE }}"
+        git config --global user.email "${{ inputs.GIT_USER_EMAIL }}"
+        git config --global user.name "${{ inputs.description }}"
+        git tag -a "${{ inputs.TAG_NAME }}" -m "${{ inputs.GIT_USER }} triggered build"
         git push origin "${{ inputs.TAG_NAME }}" --force
+        
