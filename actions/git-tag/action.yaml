@@ -1,0 +1,29 @@
+name: 'Create Git Tag'
+description: 'Tag succesfull build'
+
+inputs:
+  TAG_NAME:
+    description: 'desired tag name'
+    required: true
+  TAG_MESSAGE:
+    description: 'desired tag message'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: restart-deployment
+      shell: bash
+      run: |
+        # Create the tag
+        git tag -a "${{ inputs.TAG_NAME }}" -m "${{ inputs.TAG_MESSAGE }}"
+
+        # Optionally, force-push the tag (if needed)
+        # git push origin "${{ inputs.TAG_NAME }}" --force
+
+        # Verify the tag creation
+        if [ $? -eq 0 ]; then
+          echo "Tag '${{ inputs.TAG_NAME }}' created successfully."
+        else
+          echo "Tag creation failed."
+        fi
