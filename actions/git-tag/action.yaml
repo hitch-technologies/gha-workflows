@@ -20,7 +20,7 @@ runs:
       run: |
         # Create the tag
         git config --global user.email "${{ inputs.GIT_USER_EMAIL }}"
-        git config --global user.name "${{ inputs.description }}"
+        git config --global user.name "${{ inputs.GIT_USER }}"
         git tag -a "${{ inputs.TAG_NAME }}" -m "${{ inputs.GIT_USER }} triggered build"
         git push origin "${{ inputs.TAG_NAME }}" --force
         
