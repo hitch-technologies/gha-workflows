@@ -17,13 +17,4 @@ runs:
       run: |
         # Create the tag
         git tag -a "${{ inputs.TAG_NAME }}" -m "${{ inputs.TAG_MESSAGE }}"
-
-        # Optionally, force-push the tag (if needed)
-        # git push origin "${{ inputs.TAG_NAME }}" --force
-
-        # Verify the tag creation
-        if [ $? -eq 0 ]; then
-          echo "Tag '${{ inputs.TAG_NAME }}' created successfully."
-        else
-          echo "Tag creation failed."
-        fi
+        git push origin "${{ inputs.TAG_NAME }}" --force
