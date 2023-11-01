@@ -101,7 +101,6 @@ jobs:
 
       - name: Build and push image
         uses: mr-smithers-excellent/docker-build-push@v6
-        name: Build & push Docker image
         with:
           image: ${{ inputs.ECR_REPO }}
           registry: ${{ steps.login-ecr.outputs.registry }}
