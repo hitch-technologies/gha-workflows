@@ -108,9 +108,6 @@ jobs:
           dockerfile: ${{ inputs.DOCKERFILE_PATH }}/Dockerfile
           directory: ${{ inputs.DOCKER_CONTEXT }}
           pushImage: true
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws-access-key-id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws-secret-access-key }}
 
       - name: Create Git Tag
         uses: hitch-technologies/gha-workflows/actions/git-tag@main
