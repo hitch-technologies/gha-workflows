@@ -104,6 +104,13 @@ jobs:
         run: |
           docker context create builders
 
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+
       - name: Set up Docker Buildx
         id: buildx
         uses:  docker/setup-buildx-action@v2.2.1
@@ -112,7 +119,7 @@ jobs:
           endpoint: builders
 
       - name: Build and push image
-        uses: docker/build-push-action@v4.0.0
+        uses: docker/build-push-action@v5
         with:
           context: ${{ inputs.DOCKER_CONTEXT }}
           file: ${{ inputs.DOCKERFILE_PATH }}/Dockerfile
