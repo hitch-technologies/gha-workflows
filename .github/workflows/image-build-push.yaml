@@ -1,0 +1,155 @@
+name: "Build and Push"
+
+on:
+  workflow_call:
+
+    inputs:
+      SLACK_BUILD_CHANNEL_ID:
+        type: string
+        required: true
+        description: '#gha-builds - ID'
+      SLACK_BUILD_MESSAGE_ID:
+        type: string
+        required: true
+        description: '#gha-builds - Message ID'
+      ECR_REPO:
+        type: string
+        required: true
+        description: 'Elastic Container Repository of the service'
+      DOCKER_CONTEXT:
+        type: string
+        required: true
+        description: 'Path to service code'
+      DOCKERFILE_PATH:
+        type: string
+        required: true
+        description: 'Path to service code'
+    secrets:
+      slack-bot-token:
+        required: true
+      aws-access-key-id:
+        required: true
+      aws-secret-access-key:
+        required: true
+      aws-region:
+        required: true
+      dockerhub-username:
+        required: true
+      dockerhub-token:
+        required: true
+        
+jobs:
+  workflow:
+    runs-on: small-runner
+    outputs:
+      TAG: ${{ env.TAG }}
+      GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
+
+    steps:
+      - name: Set environment variables
+        run: |
+          echo "SHORT_COMMIT=`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          echo "TAG=${GITHUB_REF##*/}-`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
+          echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
+          echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2.1.0
+        with:
+          username: ${{ secrets.dockerhub-username }}
+          password: ${{ secrets.dockerhub-token }}
+
+      - name: Notify Slack of Build
+        id: gh-build
+        uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
+        with:
+          channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
+          message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
+          status: |
+            Starting Image Build
+
+            - Image Tag: ${{ env.TAG }}
+            - Actor: ${{ env.GITHUB_ACTOR }}
+            - Job URL: ${{ env.JOB_URL }}
+          color: 0037FF
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
+
+      - name: Checkout
+        uses: actions/checkout@v3
+ 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-region: ${{ secrets.aws-region }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Install AWS cli
+        id: install-aws-cli
+        uses: unfor19/install-aws-cli-action@v1
+
+      - name: ECR repo setup
+        uses: hitch-technologies/gha-workflows/actions/ecr-setup@main
+        with:
+          ECR_REPO: ${{ inputs.ECR_REPO }}
+
+      - name: Build and push image
+        uses: mr-smithers-excellent/docker-build-push@v6
+        name: Build & push Docker image
+        with:
+          image: ${{ inputs.ECR_REPO }}
+          registry: ${{ steps.login-ecr.outputs.registry }}
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ECR_REPO }}:${{ env.TAG }}
+          dockerfile: ${{ inputs.DOCKERFILE_PATH }}/Dockerfile
+          directory: ${{ inputs.DOCKER_CONTEXT }}
+          pushImage: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws-access-key-id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws-secret-access-key }}
+
+      - name: Create Git Tag
+        uses: hitch-technologies/gha-workflows/actions/git-tag@main
+        continue-on-error: true
+        with:
+          TAG_NAME: ${{ env.TAG }}
+          GIT_USER: ${{ github.actor }}
+          GIT_USER_EMAIL: ${{ github.actor }}@hitch.net
+          # force_push_tag: true
+
+      - name: Notify Slack of Success
+        if: success()
+        uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
+        with:
+          channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
+          message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
+          status: |
+            Image Build Completed
+
+            - Image Tag: ${{ env.TAG }}
+            - Actor: ${{ env.GITHUB_ACTOR }}
+            - Job URL: ${{ env.JOB_URL }}
+          color: good
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }} 
+
+      - name: Notify Slack of Failure
+        if: failure()
+        uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
+        with:
+          channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
+          message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
+          status: |
+            Image Build Failed 
+
+            - Image Tag: ${{ env.TAG }}
+            - Actor: ${{ env.GITHUB_ACTOR }}
+            - Job URL: ${{ env.JOB_URL }}
+          color: danger
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }} 
