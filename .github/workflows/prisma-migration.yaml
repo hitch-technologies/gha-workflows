@@ -20,6 +20,10 @@ on:
         type: string
         required: true
         description: 'Image tag to deploy'
+      GITHUB_RUNNER:
+        type: string
+        required: true
+        description: 'Name of GitHub Runner'
     secrets:
       slack-bot-token:
         required: true
@@ -38,7 +42,7 @@ on:
 
 jobs:
   workflow:
-    runs-on: small-runner
+    runs-on: ${{ inputs.GITHUB_RUNNER }}
 
     steps:
       - name: Login to Docker Hub
