@@ -84,7 +84,7 @@ jobs:
 
       - name: Run migration image
         run: |
-          docker run -e DATABASE_URL=${{ secrets.postgres-database-url }} ${{ inputs.ECR_FULL_PATH }}:${{ inputs.TAG }}
+          docker run -e POSTGRES_DATABASE_URL=${{ secrets.postgres-database-url }} ${{ inputs.ECR_FULL_PATH }}:${{ inputs.TAG }}
 
       - name: Notify Slack of Success
         if: success()
