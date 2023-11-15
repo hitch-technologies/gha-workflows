@@ -80,7 +80,7 @@ jobs:
 
       - name: Run migration image
         run: |
-          docker run -e DATABASE_URL=${{ secrets.postgres-database-url }} ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ECR_REPO }}:${{ env.TAG }}
+          docker run -e POSTGRES_DATABASE_URL=${{ secrets.postgres-database-url }} ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ECR_REPO }}:${{ env.TAG }}
 
       - name: Notify Slack of Success
         if: success()
