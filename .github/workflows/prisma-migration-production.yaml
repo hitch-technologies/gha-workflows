@@ -8,10 +8,6 @@ on:
         type: string
         required: true
         description: '#gha-builds - ID'
-      SLACK_BUILD_MESSAGE_ID:
-        type: string
-        required: true
-        description: '#gha-builds - Message ID'
       ECR_FULL_PATH:
         type: string
         required: true
