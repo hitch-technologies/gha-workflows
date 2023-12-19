@@ -1,48 +1,48 @@
-name: "Deploy to Production"
+name: "Run Prisma Migration"
 
 on:
   workflow_call:
-  
+
     inputs:
       SLACK_DEPLOY_CHANNEL_ID:
         type: string
         required: true
+        description: '#gha-builds - ID'
+      SLACK_BUILD_MESSAGE_ID:
+        type: string
+        required: true
+        description: '#gha-builds - Message ID'
       ECR_FULL_PATH:
         type: string
         required: true
         description: 'Elastic Container Repository of the service'
-      KUSTOMIZE:
-        type: string
-        required: true
-        description: 'Path to service code'
-      DEPLOYMENT_REPO:
-        type: string
-        required: true
-        description: 'Deployment Repository'
       IMAGE_TAG:
         type: string
         required: true
         description: 'Image Tag'
-      ARGO_ROLLOUTS_URL:
+      GITHUB_RUNNER:
         type: string
         required: true
-        description: 'Deployment Repository'
+        description: 'Name of GitHub Runner'
     secrets:
       slack-bot-token:
         required: true
-      gh-pat:
+      aws-access-key-id:
+        required: true
+      aws-secret-access-key:
+        required: true
+      aws-region:
         required: true
       dockerhub-username:
         required: true
       dockerhub-token:
         required: true
-        
+      postgres-database-url:
+        required: true
+
 jobs:
   workflow:
-    runs-on: small-runner
-    outputs:
-      TAG: ${{ env.TAG }}
-      GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
+    runs-on: ${{ inputs.GITHUB_RUNNER }}
 
     steps:
       - name: Set environment variables
@@ -92,7 +92,7 @@ jobs:
         with:
           channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           status: |
-            Deploying Image on Development
+            Starting Prisma Migration
 
             - Image Tag: ${{ inputs.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
@@ -101,37 +101,24 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
 
-      - name: Checkout cd-deployment repo
-        uses: actions/checkout@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
-          repository: hitch-technologies/cd-deployments
-          token: ${{ secrets.gh-pat }}
-          ref: main
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-region: ${{ secrets.aws-region }}
 
-      - name: Setup Kustomize
-        uses: imranismail/setup-kustomize@v1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Update Kubernetes resources
+      - name: Pull migration image
         run: |
-          cd ${{ inputs.KUSTOMIZE }}
-          kustomize edit set image ${{ inputs.ECR_FULL_PATH }}:OLD_TAG=${{ inputs.ECR_FULL_PATH }}:${{ env.TAG }}
-          
-      - name: Commit Files
-        id: commitFiles
-        run: |
-          sleep .$[ ( $RANDOM % 10 ) + 1 ]s
-          git config --global user.email "devops@hitch.net"
-          git config --global user.name "Hitch-DevOps"
-          git commit -am "New Deploy ${{ env.TAG }} by ${{ env.GITHUB_ACTOR }}"
-          git remote set-url origin https://${{ secrets.gh-pat }}@github.com/hitch-technologies/cd-deployments.git
-          git pull --autostash --rebase -X ours
+          docker pull ${{ inputs.ECR_FULL_PATH }}:${{ inputs.IMAGE_TAG }}
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          repository: ${{ inputs.DEPLOYMENT_REPO }}
-          github_token: ${{ secrets.gh-pat }}
-          branch: main
+      - name: Run migration image
+        run: |
+          docker run -e POSTGRES_DATABASE_URL=${{ secrets.postgres-database-url }} ${{ inputs.ECR_FULL_PATH }}:${{ inputs.IMAGE_TAG }}
 
       - name: Notify Slack of Success
         if: success()
@@ -140,9 +127,8 @@ jobs:
           channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
           status: |
-            Argo Rollouts Deployment Created
+            Prisma Migration Completed
 
-            - Argo Rollouts: ${{ env.ARGO_ROLLOUTS_URL }}
             - Image Tag: ${{ inputs.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
@@ -157,12 +143,12 @@ jobs:
           channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
           status: |
-            Argo Rollouts Deployment Failed
+            Prisma Migration Failed
 
-            - Argo Rollouts: ${{ env.ARGO_ROLLOUTS_URL }}
             - Image Tag: ${{ inputs.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: danger
         env:
           SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
+

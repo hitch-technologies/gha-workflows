@@ -4,7 +4,7 @@ on:
   workflow_call:
 
     inputs:
-      SLACK_BUILD_CHANNEL_ID:
+      SLACK_DEPLOY_CHANNEL_ID:
         type: string
         required: true
         description: '#gha-builds - ID'
@@ -16,10 +16,6 @@ on:
         type: string
         required: true
         description: 'Elastic Container Repository of the service'
-      TAG:
-        type: string
-        required: true
-        description: 'Image tag to deploy'
       GITHUB_RUNNER:
         type: string
         required: true
@@ -45,22 +41,29 @@ jobs:
     runs-on: ${{ inputs.GITHUB_RUNNER }}
 
     steps:
+      - name: Set environment variables
+        run: |
+          echo "SHORT_COMMIT=`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          echo "TAG=${GITHUB_REF##*/}-`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
+          echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
+          echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
+
       - name: Login to Docker Hub
         uses: docker/login-action@v2.1.0
         with:
           username: ${{ secrets.dockerhub-username }}
           password: ${{ secrets.dockerhub-token }}
 
-      - name: Notify Slack of Build
-        id: gh-build
+      - name: Notify Slack of Deployment
+        id: gh-deploy-prod
         uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
         with:
-          channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
-          message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
+          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           status: |
             Starting Prisma Migration
 
-            - Image Tag: ${{ inputs.TAG }}
+            - Image Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: 0037FF
@@ -80,22 +83,22 @@ jobs:
 
       - name: Pull migration image
         run: |
-          docker pull ${{ inputs.ECR_FULL_PATH }}:${{ inputs.TAG }}
+          docker pull ${{ inputs.ECR_FULL_PATH }}:${{ env.TAG }}
 
       - name: Run migration image
         run: |
-          docker run -e POSTGRES_DATABASE_URL=${{ secrets.postgres-database-url }} ${{ inputs.ECR_FULL_PATH }}:${{ inputs.TAG }}
+          docker run -e POSTGRES_DATABASE_URL=${{ secrets.postgres-database-url }} ${{ inputs.ECR_FULL_PATH }}:${{ env.TAG }}
 
       - name: Notify Slack of Success
         if: success()
         uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
         with:
-          channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
-          message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
+          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
+          message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
           status: |
             Prisma Migration Completed
 
-            - Image Tag: ${{ inputs.TAG }}
+            - Image Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: good
@@ -106,12 +109,12 @@ jobs:
         if: failure()
         uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
         with:
-          channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
-          message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
+          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
+          message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
           status: |
             Prisma Migration Failed
 
-            - Image Tag: ${{ inputs.TAG }}
+            - Image Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: danger
