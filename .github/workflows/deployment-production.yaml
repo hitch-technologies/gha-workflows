@@ -39,7 +39,7 @@ on:
         
 jobs:
   workflow:
-    runs-on: small-runner
+    runs-on: eks-small-runner
     outputs:
       TAG: ${{ env.TAG }}
       GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
@@ -101,10 +101,10 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
 
-      - name: Checkout cd-deployment repo
+      - name: Checkout k8s-deployment repo
         uses: actions/checkout@v3
         with:
-          repository: hitch-technologies/cd-deployments
+          repository: hitch-technologies/${{ inputs.DEPLOYMENT_REPO }}
           token: ${{ secrets.gh-pat }}
           ref: main
 
@@ -123,13 +123,13 @@ jobs:
           git config --global user.email "devops@hitch.net"
           git config --global user.name "Hitch-DevOps"
           git commit -am "New Deploy ${{ env.TAG }} by ${{ env.GITHUB_ACTOR }}"
-          git remote set-url origin https://${{ secrets.gh-pat }}@github.com/hitch-technologies/cd-deployments.git
+          git remote set-url origin https://${{ secrets.gh-pat }}@github.com/hitch-technologies/${{ inputs.DEPLOYMENT_REPO }}.git
           git pull --autostash --rebase -X ours
 
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          repository: ${{ inputs.DEPLOYMENT_REPO }}
+          repository: hitch-technologies/${{ inputs.DEPLOYMENT_REPO }}
           github_token: ${{ secrets.gh-pat }}
           branch: main
 
