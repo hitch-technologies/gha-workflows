@@ -112,7 +112,7 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          repository :hitch-technologies/${{ inputs.DEPLOYMENT_REPO }}
+          repository: hitch-technologies/${{ inputs.DEPLOYMENT_REPO }}
           github_token: ${{ secrets.gh-pat }}
           branch: main
 
