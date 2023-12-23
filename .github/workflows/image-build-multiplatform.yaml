@@ -37,10 +37,10 @@ on:
         required: true
       dockerhub-token:
         required: true
-        
+
 jobs:
   workflow:
-    runs-on: small-runner-arm64
+    runs-on: eks-small-runner
     outputs:
       TAG: ${{ env.TAG }}
       GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
@@ -78,7 +78,7 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
- 
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
@@ -146,7 +146,7 @@ jobs:
             - Job URL: ${{ env.JOB_URL }}
           color: good
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }} 
+          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
 
       - name: Notify Slack of Failure
         if: failure()
@@ -155,11 +155,11 @@ jobs:
           channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
           message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
           status: |
-            Image Build Failed 
+            Image Build Failed
 
             - Image Tag: ${{ env.TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
           color: danger
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }} 
+          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
