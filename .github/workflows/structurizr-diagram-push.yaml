@@ -1,0 +1,162 @@
+name: "Structurizr Diagram Deployment"
+
+on:
+  workflow_call:
+  
+    inputs:
+      PROJECT:
+        type: string
+        required: true
+      TEAM:
+        type: string
+        required: true
+      ARCHITECTURE_REPO:
+        type: string
+        required: true
+      STRUCTURIZR_URL:
+        type: string
+        required: true
+      WORKSPACE_DIAGRAM_PATH:
+        type: string
+        required: true
+    secrets:
+      slack-bot-token:
+        required: true
+      gh-pat:
+        required: true
+      dockerhub-username:
+        required: true
+      dockerhub-token:
+        required: true
+      structurizr-admin-api-key:
+        required: true
+        
+jobs:
+  workflow:
+    runs-on: eks-small-runner
+    outputs:
+      TAG: ${{ env.TAG }}
+      GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
+
+    steps:
+      - name: Set environment variables
+        run: |
+          echo "SHORT_COMMIT=`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          echo "TAG=${GITHUB_REF##*/}-`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
+          echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
+          echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2.1.0
+        with:
+          username: ${{ secrets.dockerhub-username }}
+          password: ${{ secrets.dockerhub-token }}
+
+      - name: Notify Slack of Deployment
+        id: gh-deploy-prod
+        uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
+        with:
+          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
+          status: |
+            Deploying Diagram on Structurizr
+
+            - Version Tag: ${{ env.TAG }}
+            - Actor: ${{ env.GITHUB_ACTOR }}
+            - Job URL: ${{ env.JOB_URL }}
+            - Workspace: ${{ inputs.TEAM }}/${{ inputs.PROJECT }}
+          color: 0037FF
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
+
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          repository: hitch-technologies/${{ inputs.ARCHITECTURE_REPO }}
+          token: ${{ secrets.gh-pat }}
+          ref: main
+
+      - name: Check and create workspace
+        run: |
+          # Function to check if a workspace exists
+          check_workspace_exists() {
+            local response
+            response=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${{ inputs.STRUCTURIZR_URL }}/workspace" -H "X-Authorization: ${{ secrets.structurizr-admin-api-key }}")
+            
+            if [ "$response" == "200" ]; then
+              echo "Workspace already exists."
+              return 0
+            else
+              echo "Workspace does not exist."
+              return 1
+            fi
+          }
+          # Function to create a new workspace
+          create_workspace() {
+            local response
+            response=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${{ inputs.STRUCTURIZR_URL }}/workspace" -H "X-Authorization: ${{ secrets.structurizr-admin-api-key }}")
+            
+            if [ "$response" == "200" ]; then
+              echo "Workspace created successfully."
+              return 0
+            else
+              echo "Failed to create workspace."
+              return 1
+            fi
+          }
+          # Check if the workspace exists
+          if check_workspace_exists; then
+            echo "Workspace already exists."
+          else
+            # Create the workspace if it doesn't exist
+            create_workspace
+          fi
+          # Fetch the workspace ID
+          WORKSPACE_ID=$(curl -X GET "${{ inputs.STRUCTURIZR_URL }}/workspace" -H "X-Authorization: ${{ secrets.structurizr-admin-api-key }}")
+          WORKSPCE_API_KEY=$(curl -X GET "${{ inputs.STRUCTURIZR_URL }}/workspaces/$WORKSPACE_ID/apiKeys" -H "X-Authorization: ${{ secrets.structurizr-admin-api-key }})
+          WORKSPACE_SECRET = 
+
+      - name: Run structurizr-cli push
+        uses: aidmax/structurizr-cli-action@v1
+        with:
+          id: $WORKSPACE_ID
+          key: $WORKSPCE_API_KEY
+          secret: $WORKSPACE_SECRET
+          workspace: ${{ inputs.WORKSPACE_DIAGRAM_PATH }}
+          url: ${{ inputs.STRUCTURIZR_URL }}
+          merge: false
+          archive: true
+
+      - name: Notify Slack of Success
+        if: success()
+        uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
+        with:
+          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
+          message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
+          status: |
+            Structurizr diagram deployed
+
+            - Version Tag: ${{ env.TAG }}
+            - Actor: ${{ env.GITHUB_ACTOR }}
+            - Job URL: ${{ env.JOB_URL }}
+            - Workspace: ${{ inputs.TEAM }}/${{ inputs.PROJECT }}
+          color: good
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
+
+      - name: Notify Slack of Failure
+        if: failure()
+        uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
+        with:
+          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
+          message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
+          status: |
+            Structurizr diagram deployment failed
+
+            - Version Tag: ${{ env.TAG }}
+            - Actor: ${{ env.GITHUB_ACTOR }}
+            - Job URL: ${{ env.JOB_URL }}
+            - Workspace: ${{ inputs.TEAM }}/${{ inputs.PROJECT }}
+          color: danger
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
