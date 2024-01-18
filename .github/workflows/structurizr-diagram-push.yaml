@@ -158,7 +158,7 @@ jobs:
           key: ${{ env.WORKSPACE_API_KEY }}
           secret: ${{ env.WORKSPACE_API_SECRET }}
           workspace: ${{ inputs.WORKSPACE_DIAGRAM_PATH }}
-          url: ${{ inputs.STRUCTURIZR_URL }}/api/workspace
+          url: ${{ inputs.STRUCTURIZR_URL }}/api
           merge: false
           archive: true
 
