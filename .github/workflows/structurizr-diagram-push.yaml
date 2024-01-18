@@ -152,7 +152,7 @@ jobs:
         with:
           id: $WORKSPACE_ID
           key: $WORKSPCE_API_KEY
-          secret: $WORKSPACE_SECRET
+          secret: $WORKSPACE_API_SECRET
           workspace: ${{ inputs.WORKSPACE_DIAGRAM_PATH }}
           url: ${{ inputs.STRUCTURIZR_URL }}
           merge: false
