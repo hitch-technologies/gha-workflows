@@ -95,7 +95,7 @@ jobs:
             local workspace_id
 
             PREFIX="Workspace 0"
-            workspace_id=$(echo "$workspaces" | jq -r --arg PREFIX "$PREFIX" --arg WORKSPACE_DIAGRAM_NAME "$WORKSPACE_DIAGRAM_NAME" '.workspaces[] | select(.name == $WORKSPACE_DIAGRAM_NAME) | startswith($PREFIX)) | .id')
+            workspace_id=$(echo "$workspaces" | jq -r --arg NAME "$WORKSPACE_DIAGRAM_NAME" --arg PREFIX "$PREFIX" '.workspaces[] | select(.name == $NAME or (.name|startswith($PREFIX))) | .id')
 
             if [ -n "$workspace_id" ]; then
               echo "Workspace with name $WORKSPACE_DIAGRAM_NAME already exists."
@@ -132,9 +132,9 @@ jobs:
             workspaces=$(get_workspaces)
 
             PREFIX="Workspace 0"
-            WORKSPACE_ID=$(echo "$workspaces" | jq -r --arg name1 "$WORKSPACE_DIAGRAM_NAME" --arg PREFIX "$PREFIX" '.workspaces[] | select(.name == $name1 or (.name|startswith($PREFIX))) | .id')
-            API_KEY=$(echo "$workspaces" | jq -r --arg name1 "$WORKSPACE_DIAGRAM_NAME" --arg PREFIX "$PREFIX" '.workspaces[] | select(.name == $name1 or (.name|startswith($PREFIX))) | .apiKey')
-            API_SECRET=$(echo "$workspaces" | jq -r --arg name1 "$WORKSPACE_DIAGRAM_NAME" --arg PREFIX "$PREFIX" '.workspaces[] | select(.name == $name1 or (.name|startswith($PREFIX))) | .apiSecret')
+            WORKSPACE_ID=$(echo "$workspaces" | jq -r --arg NAME "$WORKSPACE_DIAGRAM_NAME" --arg PREFIX "$PREFIX" '.workspaces[] | select(.name == $NAME or (.name|startswith($PREFIX))) | .id')
+            API_KEY=$(echo "$workspaces" | jq -r --arg NAME "$WORKSPACE_DIAGRAM_NAME" --arg PREFIX "$PREFIX" '.workspaces[] | select(.name == $NAME or (.name|startswith($PREFIX))) | .apiKey')
+            API_SECRET=$(echo "$workspaces" | jq -r --arg NAME "$WORKSPACE_DIAGRAM_NAME" --arg PREFIX "$PREFIX" '.workspaces[] | select(.name == $NAME or (.name|startswith($PREFIX))) | .apiSecret')
 
             export WORKSPACE_ID
             export WORKSPCE_API_KEY
