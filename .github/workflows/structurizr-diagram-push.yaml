@@ -128,10 +128,13 @@ jobs:
           get_workspace_details() {
             local workspaces
             workspaces=$(get_workspaces)
+            '
             
-            WORKSPACE_ID=$(echo "$workspaces" | jq -r --arg WORKSPACE_DIAGRAM_NAME "$WORKSPACE_DIAGRAM_NAME" '.workspaces[] | select(.name == $WORKSPACE_DIAGRAM_NAME) | .id')
-            API_KEY=$(echo "$workspaces" | jq -r --arg WORKSPACE_DIAGRAM_NAME "$WORKSPACE_DIAGRAM_NAME" '.workspaces[] | select(.name == $WORKSPACE_DIAGRAM_NAME) | .apiKey')
-            API_SECRET=$(echo "$workspaces" | jq -r --arg WORKSPACE_DIAGRAM_NAME "$WORKSPACE_DIAGRAM_NAME" '.workspaces[] | select(.name == $WORKSPACE_DIAGRAM_NAME) | .apiSecret')
+            PREFIX="Workspace 0"
+            WORKSPACE_ID=$(echo "$workspaces" | jq -r --arg name1 "$WORKSPACE_DIAGRAM_NAME" --arg prefix "$PREFIX" '.workspaces[] | select(.name == $name1 or .name | startswith($prefix)) | .id')
+            API_KEY=$(echo "$workspaces" | jq -r --arg name1 "$WORKSPACE_DIAGRAM_NAME" --arg prefix "$PREFIX" '.workspaces[] | select(.name == $name1 or .name | startswith($prefix)) | .apiKey')
+            API_SECRET=$(echo "$workspaces" | jq -r --arg name1 "$WORKSPACE_DIAGRAM_NAME" --arg prefix "$PREFIX" '.workspaces[] | select(.name == $name1 or .name | startswith($prefix)) | .apiSecret')
+
 
             export WORKSPACE_ID
             export WORKSPCE_API_KEY
