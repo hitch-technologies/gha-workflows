@@ -143,6 +143,10 @@ jobs:
             echo "Workspace ID: $WORKSPACE_ID"
             echo "API Key: $WORKSPACE_API_KEY"
             echo "API Secret: $WORKSPACE_API_SECRET"
+
+            echo "WORKSPACE_ID=${WORKSPACE_ID}"  >> $GITHUB_ENV
+            echo "WORKSPACE_API_KEY=${WORKSPACE_API_KEY}"  >> $GITHUB_ENV
+            echo "WORKSPACE_API_SECRET=${WORKSPACE_API_SECRET}"  >> $GITHUB_ENV
           }
 
           get_workspace_details
@@ -150,9 +154,9 @@ jobs:
       - name: Run structurizr-cli push
         uses: aidmax/structurizr-cli-action@v1
         with:
-          id: $WORKSPACE_ID
-          key: $WORKSPCE_API_KEY
-          secret: $WORKSPACE_API_SECRET
+          id: ${{ env.WORKSPACE_ID }}
+          key: ${{ env.WORKSPCE_API_KEY }}
+          secret: $ {{ env.WORKSPACE_API_SECRET }}
           workspace: ${{ inputs.WORKSPACE_DIAGRAM_PATH }}
           url: ${{ inputs.STRUCTURIZR_URL }}
           merge: false
