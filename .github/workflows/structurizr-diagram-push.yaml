@@ -13,7 +13,7 @@ on:
       ARCHITECTURE_REPO:
         type: string
         required: true
-      SLACK_DEV_DEPLOY_CHANNEL_ID:
+      SLACK_DEPLOY_CHANNEL_ID:
         type: string
         required: true
       STRUCTURIZR_URL:
@@ -56,21 +56,21 @@ jobs:
           username: ${{ secrets.dockerhub-username }}
           password: ${{ secrets.dockerhub-token }}
 
-      - name: Notify Slack of Deployment
-        id: gh-deploy-prod
-        uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
-        with:
-          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
-          status: |
-            Deploying Diagram on Structurizr
+      # - name: Notify Slack of Deployment
+      #   id: gh-deploy-prod
+      #   uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
+      #   with:
+      #     channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
+      #     status: |
+      #       Deploying Diagram on Structurizr
 
-            - Version Tag: ${{ env.TAG }}
-            - Actor: ${{ env.GITHUB_ACTOR }}
-            - Job URL: ${{ env.JOB_URL }}
-            - Workspace: ${{ inputs.TEAM }}/${{ inputs.PROJECT }}
-          color: 0037FF
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
+      #       - Version Tag: ${{ env.TAG }}
+      #       - Actor: ${{ env.GITHUB_ACTOR }}
+      #       - Job URL: ${{ env.JOB_URL }}
+      #       - Workspace: ${{ inputs.TEAM }}/${{ inputs.PROJECT }}
+      #     color: 0037FF
+      #   env:
+      #     SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
 
       - name: Checkout repo
         uses: actions/checkout@v3
