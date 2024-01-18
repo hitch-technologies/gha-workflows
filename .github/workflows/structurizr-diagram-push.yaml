@@ -104,7 +104,7 @@ jobs:
           # Function to create a new workspace
           create_workspace() {
             local response
-            response=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${{ inputs.STRUCTURIZR_URL }}/workspace" -H "X-Authorization: ${{ secrets.structurizr-admin-api-key }}")
+            response=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${{ inputs.STRUCTURIZR_URL }}/api/workspace" -H "X-Authorization: ${{ secrets.structurizr-admin-api-key }}")
             
             if [ "$response" == "200" ]; then
               echo "Workspace created successfully."
