@@ -156,15 +156,7 @@ jobs:
           get_workspace_details
 
       - name: Run structurizr-cli push
-        uses: aidmax/structurizr-cli-action@v1
-        with:
-          id: ${{ env.WORKSPACE_ID }}
-          key: ${{ env.WORKSPACE_API_KEY }}
-          secret: $ {{ env.WORKSPACE_API_SECRET }}
-          workspace: ${{ inputs.WORKSPACE_DIAGRAM_PATH }}
-          url: ${{ inputs.STRUCTURIZR_URL }}
-          merge: false
-          archive: true
+        run: docker run -it --rm -v $PWD:/usr/local/structurizr structurizr/cli push -url ${{ inputs.STRUCTURIZR_URL }} -id  ${{ env.WORKSPACE_ID }} -key ${{ env.WORKSPACE_API_KEY }} -secret ${{ env.WORKSPACE_API_SECRET }} -workspace ${{ inputs.WORKSPACE_DIAGRAM_PATH }}
 
       - name: Notify Slack of Success
         if: success()
