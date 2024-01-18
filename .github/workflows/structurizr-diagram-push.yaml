@@ -22,6 +22,9 @@ on:
       WORKSPACE_DIAGRAM_PATH:
         type: string
         required: true
+      WORKSPACE_DIAGRAM_NAME:
+        type: string
+        required: true
     secrets:
       slack-bot-token:
         required: true
@@ -90,13 +93,13 @@ jobs:
             local workspaces
             workspaces=$(get_workspaces)
             local workspace_id
-            workspace_id=$(echo "$workspaces" | jq -r --arg WORKSPACE_NAME "$WORKSPACE_NAME" '.workspaces[] | select(.name == $WORKSPACE_NAME) | .id')
+            workspace_id=$(echo "$workspaces" | jq -r --arg WORKSPACE_DIAGRAM_NAME "$WORKSPACE_DIAGRAM_NAME" '.workspaces[] | select(.name == $WORKSPACE_DIAGRAM_NAME) | .id')
 
             if [ -n "$workspace_id" ]; then
-              echo "Workspace with name $WORKSPACE_NAME already exists."
+              echo "Workspace with name $WORKSPACE_DIAGRAM_NAME already exists."
               return 0
             else
-              echo "Workspace with name $WORKSPACE_NAME does not exist."
+              echo "Workspace with name $WORKSPACE_DIAGRAM_NAME does not exist."
               return 1
             fi
           }
@@ -126,9 +129,9 @@ jobs:
             local workspaces
             workspaces=$(get_workspaces)
             
-            WORKSPACE_ID=$(echo "$workspaces" | jq -r --arg WORKSPACE_NAME "$WORKSPACE_NAME" '.workspaces[] | select(.name == $WORKSPACE_NAME) | .id')
-            API_KEY=$(echo "$workspaces" | jq -r --arg WORKSPACE_NAME "$WORKSPACE_NAME" '.workspaces[] | select(.name == $WORKSPACE_NAME) | .apiKey')
-            API_SECRET=$(echo "$workspaces" | jq -r --arg WORKSPACE_NAME "$WORKSPACE_NAME" '.workspaces[] | select(.name == $WORKSPACE_NAME) | .apiSecret')
+            WORKSPACE_ID=$(echo "$workspaces" | jq -r --arg WORKSPACE_DIAGRAM_NAME "$WORKSPACE_DIAGRAM_NAME" '.workspaces[] | select(.name == $WORKSPACE_DIAGRAM_NAME) | .id')
+            API_KEY=$(echo "$workspaces" | jq -r --arg WORKSPACE_DIAGRAM_NAME "$WORKSPACE_DIAGRAM_NAME" '.workspaces[] | select(.name == $WORKSPACE_DIAGRAM_NAME) | .apiKey')
+            API_SECRET=$(echo "$workspaces" | jq -r --arg WORKSPACE_DIAGRAM_NAME "$WORKSPACE_DIAGRAM_NAME" '.workspaces[] | select(.name == $WORKSPACE_DIAGRAM_NAME) | .apiSecret')
 
             export WORKSPACE_ID
             export WORKSPCE_API_KEY
