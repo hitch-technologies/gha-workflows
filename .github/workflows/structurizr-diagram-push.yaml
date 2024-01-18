@@ -13,6 +13,9 @@ on:
       ARCHITECTURE_REPO:
         type: string
         required: true
+      SLACK_DEV_DEPLOY_CHANNEL_ID:
+        type: string
+        required: true
       STRUCTURIZR_URL:
         type: string
         required: true
