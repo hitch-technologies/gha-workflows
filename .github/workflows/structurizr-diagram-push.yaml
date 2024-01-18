@@ -155,7 +155,7 @@ jobs:
         uses: aidmax/structurizr-cli-action@v1
         with:
           id: ${{ env.WORKSPACE_ID }}
-          key: ${{ env.WORKSPCE_API_KEY }}
+          key: ${{ env.WORKSPACE_API_KEY }}
           secret: $ {{ env.WORKSPACE_API_SECRET }}
           workspace: ${{ inputs.WORKSPACE_DIAGRAM_PATH }}
           url: ${{ inputs.STRUCTURIZR_URL }}
