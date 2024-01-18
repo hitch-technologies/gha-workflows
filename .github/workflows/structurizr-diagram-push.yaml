@@ -78,19 +78,26 @@ jobs:
 
       - name: Check and create workspace
         run: |
-          # Function to check if a workspace exists
+          # Get the list of all workspaces and check if a workspace exists
+          get_workspaces() {
+            curl -s -X GET "${{ inputs.STRUCTURIZR_URL }}/api/workspace" -H "X-Authorization: ${{ secrets.structurizr-admin-api-key }}"
+          }
+
           check_workspace_exists() {
-            local response
-            response=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${{ inputs.STRUCTURIZR_URL }}/workspace" -H "X-Authorization: ${{ secrets.structurizr-admin-api-key }}")
-            
-            if [ "$response" == "200" ]; then
-              echo "Workspace already exists."
+            local workspaces
+            workspaces=$(get_workspaces)
+            local workspace_id
+            workspace_id=$(echo "$workspaces" | jq -r --arg WORKSPACE_NAME "$WORKSPACE_NAME" '.workspaces[] | select(.name == $WORKSPACE_NAME) | .id')
+
+            if [ -n "$workspace_id" ]; then
+              echo "Workspace with name $WORKSPACE_NAME already exists."
               return 0
             else
-              echo "Workspace does not exist."
+              echo "Workspace with name $WORKSPACE_NAME does not exist."
               return 1
             fi
           }
+
           # Function to create a new workspace
           create_workspace() {
             local response
@@ -104,17 +111,32 @@ jobs:
               return 1
             fi
           }
+
           # Check if the workspace exists
-          if check_workspace_exists; then
-            echo "Workspace already exists."
-          else
+          if ! check_workspace_exists; then
             # Create the workspace if it doesn't exist
             create_workspace
           fi
-          # Fetch the workspace ID
-          WORKSPACE_ID=$(curl -X GET "${{ inputs.STRUCTURIZR_URL }}/workspace" -H "X-Authorization: ${{ secrets.structurizr-admin-api-key }}")
-          WORKSPCE_API_KEY=$(curl -X GET "${{ inputs.STRUCTURIZR_URL }}/workspaces/$WORKSPACE_ID/apiKeys" -H "X-Authorization: ${{ secrets.structurizr-admin-api-key }})
-          WORKSPACE_SECRET = 
+
+          # Fetch the workspace ID, API Key, and API Secret
+          get_workspace_details() {
+            local workspaces
+            workspaces=$(get_workspaces)
+            
+            WORKSPACE_ID=$(echo "$workspaces" | jq -r --arg WORKSPACE_NAME "$WORKSPACE_NAME" '.workspaces[] | select(.name == $WORKSPACE_NAME) | .id')
+            API_KEY=$(echo "$workspaces" | jq -r --arg WORKSPACE_NAME "$WORKSPACE_NAME" '.workspaces[] | select(.name == $WORKSPACE_NAME) | .apiKey')
+            API_SECRET=$(echo "$workspaces" | jq -r --arg WORKSPACE_NAME "$WORKSPACE_NAME" '.workspaces[] | select(.name == $WORKSPACE_NAME) | .apiSecret')
+
+            export WORKSPACE_ID
+            export WORKSPCE_API_KEY
+            export WORKSPACE_SECRET
+
+            echo "Workspace ID: $WORKSPACE_ID"
+            echo "API Key: $WORKSPCE_API_KEY"
+            echo "API Secret: $WORKSPACE_SECRET"
+          }
+
+          get_workspace_details
 
       - name: Run structurizr-cli push
         uses: aidmax/structurizr-cli-action@v1
