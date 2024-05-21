@@ -55,7 +55,7 @@ jobs:
         id: gh-deploy-prod
         uses: zuplo/github-action-slack-notify-build@v2
         with:
-          channel: ${{ inputs.SLACK_DEPLOY_CHANNEL }}
+          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           status: |
             Starting Prisma Migration
 
@@ -89,7 +89,7 @@ jobs:
         if: success()
         uses: zuplo/github-action-slack-notify-build@v2
         with:
-          channel: ${{ inputs.SLACK_DEPLOY_CHANNEL }}
+          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
           status: |
             Prisma Migration Completed
@@ -105,7 +105,7 @@ jobs:
         if: failure()
         uses: zuplo/github-action-slack-notify-build@v2
         with:
-          channel: ${{ inputs.SLACK_DEPLOY_CHANNEL }}
+          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
           status: |
             Prisma Migration Failed
