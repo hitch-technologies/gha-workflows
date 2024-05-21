@@ -64,7 +64,7 @@ jobs:
         id: gh-build
         uses: zuplo/github-action-slack-notify-build@v2
         with:
-          channel_id: ${{ inputs.SLACK_BUILD_CHANNEL }}
+          channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
           message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
           status: |
             Starting Image Build
@@ -136,7 +136,7 @@ jobs:
         if: success()
         uses: zuplo/github-action-slack-notify-build@v2
         with:
-          channel_id: ${{ inputs.SLACK_BUILD_CHANNEL }}
+          channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
           message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
           status: |
             Image Build Completed
@@ -152,7 +152,7 @@ jobs:
         if: failure()
         uses: zuplo/github-action-slack-notify-build@v2
         with:
-          channel_id: ${{ inputs.SLACK_BUILD_CHANNEL }}
+          channel_id: ${{ inputs.SLACK_BUILD_CHANNEL_ID }}
           message_id: ${{ inputs.SLACK_BUILD_MESSAGE_ID }}
           status: |
             Image Build Failed
