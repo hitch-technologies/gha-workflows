@@ -4,7 +4,7 @@ on:
   workflow_call:
 
     inputs:
-      SLACK_BUILD_channel_id:
+      SLACK_BUILD_CHANNEL_ID:
         type: string
         required: true
         description: '#gha-builds - ID'
