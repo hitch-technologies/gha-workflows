@@ -54,14 +54,14 @@ jobs:
           echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v2.1.0
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.dockerhub-username }}
           password: ${{ secrets.dockerhub-token }}
 
       # - name: Notify Slack of Deployment
       #   id: gh-deploy-prod
-      #   uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
+      #   uses: zuplo/github-action-slack-notify-build@v2
       #   with:
       #     channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
       #     status: |
@@ -76,7 +76,7 @@ jobs:
       #     SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
 
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: hitch-technologies/${{ inputs.ARCHITECTURE_REPO }}
           token: ${{ secrets.gh-pat }}
@@ -164,7 +164,7 @@ jobs:
 
       - name: Notify Slack of Success
         if: success()
-        uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
+        uses: zuplo/github-action-slack-notify-build@v2
         with:
           channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
@@ -181,7 +181,7 @@ jobs:
 
       - name: Notify Slack of Failure
         if: failure()
-        uses: FlexCharge/github-action-slack-notify-build@f953c3ec8cd2f6f726a9a87bf87ac30cab0a1e19
+        uses: zuplo/github-action-slack-notify-build@v2
         with:
           channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
           message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
