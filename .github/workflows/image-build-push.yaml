@@ -40,7 +40,7 @@ on:
         
 jobs:
   workflow:
-    runs-on: eks-small-runner
+    runs-on: gha-runner-scale-set
     outputs:
       TAG: ${{ env.TAG }}
       GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
