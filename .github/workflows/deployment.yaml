@@ -85,7 +85,7 @@ jobs:
           ref: main
 
       - name: Setup Kustomize
-        uses: imranismail/setup-kustomize@v2
+        uses: imranismail/setup-kustomize@v2.1
 
       - name: Update Kubernetes resources
         run: |
