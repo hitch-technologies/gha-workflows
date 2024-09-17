@@ -40,7 +40,7 @@ on:
         
 jobs:
   workflow:
-    runs-on: gha-runner-scale-set
+    runs-on: ubuntu-latest
     outputs:
       TAG: ${{ env.TAG }}
       GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
