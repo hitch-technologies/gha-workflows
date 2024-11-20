@@ -1,0 +1,76 @@
+name: "Deploy to Development"
+
+on:
+  workflow_call:
+  
+    inputs:
+      DEPLOYMENT_REPO:
+        type: string
+        required: true
+        description: 'Deployment Repository'        
+    secrets:
+      gh-pat:
+        required: true
+      dockerhub-username:
+        required: true
+      dockerhub-token:
+        required: true
+        
+jobs:
+  workflow:
+    runs-on: gha-runner-scale-set
+    outputs:
+      TAG: ${{ env.TAG }}
+      GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
+
+    steps:
+      - name: Set environment variables
+        run: |
+          echo "SHORT_COMMIT=`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          echo "TAG=${GITHUB_REF##*/}-`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
+          echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
+          echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.dockerhub-username }}
+          password: ${{ secrets.dockerhub-token }}
+
+      - name: Checkout GitOps repo
+        uses: actions/checkout@v4
+        with:
+          repository: hitch-technologies/${{ inputs.DEPLOYMENT_REPO }}
+          token: ${{ secrets.gh-pat }}
+          path: gitops
+          ref: main
+
+      - name: Change Image Tag
+        run: |
+          GITOPS_PATH="gitops/eks-services/gha-runner-scale-set/helm"
+          sed -i 's/gha-runners:main-[0-9a-f]*/gha-runners:${{ env.TAG }}/' values.yaml
+
+      - name: Commit files
+        run: |
+          sleep .$[ ( $RANDOM % 5 ) + 1 ]s
+          git config --global user.email "devops@hitch.net"
+          git config --global user.name "Hitch-DevOps"
+          git commit -am "New Deploy ${{ env.TAG }} by ${{ env.GITHUB_ACTOR }}"
+          git remote set-url origin https://${{ secrets.gh-pat }}@github.com/hitch-technologies/${{ inputs.DEPLOYMENT_REPO }}.git
+          git pull --autostash --rebase -X ours
+
+      - name: Sleep on failure
+        if: ${{ failure() }}
+        run: |
+          sleep .$[ ( $RANDOM % 10 ) + 1 ]s
+      - name: Re-pull on failure
+        if: ${{ failure() }}
+        run: git pull --autostash --rebase -X ours
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          repository: hitch-technologies/${{ inputs.DEPLOYMENT_REPO }}
+          github_token: ${{ secrets.gh-pat }}
+          branch: main
