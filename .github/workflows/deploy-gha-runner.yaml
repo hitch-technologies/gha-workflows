@@ -76,7 +76,7 @@ jobs:
           git config --global user.email "devops@hitch.net"
           git config --global user.name "Hitch-DevOps"
           git commit -am "New Deploy ${{ env.TAG }} by ${{ env.GITHUB_ACTOR }}"
-          git remote set-url origin https://${{ secrets.gh-pat }}@github.com/hitch-technologies/${{ inputs.DEPLOYMENT_REPO }}.git
+          git remote set-url origin https://${{ secrets.gh-pat }}@github.com/${{ inputs.DEPLOYMENT_REPO }}.git
           git pull --autostash --rebase -X ours
           git push origin main
 
@@ -86,11 +86,6 @@ jobs:
           sleep .$[ ( $RANDOM % 10 ) + 1 ]s
       - name: Re-pull on failure
         if: ${{ failure() }}
-        run: git pull --autostash --rebase -X ours
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          repository: hitch-technologies/${{ inputs.DEPLOYMENT_REPO }}
-          github_token: ${{ secrets.gh-pat }}
-          branch: main
+        run: |
+          git pull --autostash --rebase -X ours
+          git push origin main
