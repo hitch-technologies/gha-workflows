@@ -41,7 +41,7 @@ jobs:
       - name: Checkout GitOps repo
         uses: actions/checkout@v4
         with:
-          repository: hitch-technologies/${{ inputs.DEPLOYMENT_REPO }}
+          repository: ${{ inputs.DEPLOYMENT_REPO }}
           token: ${{ secrets.gh-pat }}
           path: gitops
           ref: main
