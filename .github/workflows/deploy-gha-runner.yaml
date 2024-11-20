@@ -46,10 +46,28 @@ jobs:
           path: gitops
           ref: main
 
+
       - name: Change Image Tag
         run: |
           GITOPS_PATH="gitops/eks-services/gha-runner-scale-set/helm"
-          sed -i 's/gha-runners:main-[0-9a-f]*/gha-runners:${{ env.TAG }}/' values.yaml
+          
+          # Check if directory exists
+          if [ ! -d "${GITOPS_PATH}" ]; then
+            echo "Error: Directory ${GITOPS_PATH} not found"
+            exit 1
+          fi
+          
+          # Find all values.yaml files and update them
+          find "${GITOPS_PATH}" -name "values.yaml" -type f -exec \
+            sh -c 'echo "Processing: {}"; sed -i "s/gha-runners:main-[0-9a-f]*/gha-runners:${{ env.TAG }}/" "{}"' \;
+          
+          # Verify changes were made
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to update one or more values.yaml files"
+            exit 1
+          fi
+          
+          echo "Successfully updated image tags in all values.yaml files"
 
       - name: Commit files
         run: |
