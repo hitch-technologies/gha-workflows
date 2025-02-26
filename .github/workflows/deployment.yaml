@@ -2,7 +2,7 @@ name: "Deploy to Development"
 
 on:
   workflow_call:
-  
+
     inputs:
       SLACK_DEPLOY_CHANNEL_ID:
         type: string
@@ -23,7 +23,7 @@ on:
         type: string
         required: true
         description: 'Deployment Repository'
-        
+
     secrets:
       slack-bot-token:
         required: true
@@ -39,7 +39,7 @@ on:
         required: true
       dockerhub-token:
         required: true
-        
+
 jobs:
   workflow:
     runs-on: gha-runner-scale-set
@@ -62,20 +62,20 @@ jobs:
           username: ${{ secrets.dockerhub-username }}
           password: ${{ secrets.dockerhub-token }}
 
-      - name: Notify Slack of Deployment
-        id: gh-deploy-prod
-        uses: zuplo/github-action-slack-notify-build@v2
-        with:
-          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
-          status: |
-            Deploying Image on Development
+      #- name: Notify Slack of Deployment
+      #  id: gh-deploy-prod
+      #  uses: zuplo/github-action-slack-notify-build@v2
+      #  with:
+      #    channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
+      #    status: |
+      #      Deploying Image on Development
 
-            - Image Tag: ${{ env.TAG }}
-            - Actor: ${{ env.GITHUB_ACTOR }}
-            - Job URL: ${{ env.JOB_URL }}
-          color: 0037FF
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
+      #      - Image Tag: ${{ env.TAG }}
+      #      - Actor: ${{ env.GITHUB_ACTOR }}
+      #      - Job URL: ${{ env.JOB_URL }}
+      #    color: 0037FF
+      #  env:
+      #    SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
 
       - name: Checkout k8s-deployment repo
         uses: actions/checkout@v4
@@ -91,7 +91,7 @@ jobs:
         run: |
           cd ${{ inputs.KUSTOMIZE }}
           kustomize edit set image ${{ inputs.ECR_FULL_PATH }}:OLD_TAG=${{ inputs.ECR_FULL_PATH }}:${{ env.TAG }}
-          
+
       - name: Commit files
         run: |
           sleep .$[ ( $RANDOM % 5 ) + 1 ]s
@@ -116,36 +116,36 @@ jobs:
           github_token: ${{ secrets.gh-pat }}
           branch: main
 
-      - name: Notify Slack of Success
-        if: success()
-        uses: zuplo/github-action-slack-notify-build@v2
-        with:
-          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
-          message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
-          status: |
-            Argo Rollouts Deployment Created
+      #- name: Notify Slack of Success
+      #  if: success()
+      #  uses: zuplo/github-action-slack-notify-build@v2
+      #  with:
+      #    channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
+      #    message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
+      #    status: |
+      #      Argo Rollouts Deployment Created
 
-            - Argo Rollouts: ${{ inputs.ARGO_ROLLOUTS_URL }}
-            - Image Tag: ${{ env.TAG }}
-            - Actor: ${{ env.GITHUB_ACTOR }}
-            - Job URL: ${{ env.JOB_URL }}
-          color: good
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
+      #      - Argo Rollouts: ${{ inputs.ARGO_ROLLOUTS_URL }}
+      #      - Image Tag: ${{ env.TAG }}
+      #      - Actor: ${{ env.GITHUB_ACTOR }}
+      #      - Job URL: ${{ env.JOB_URL }}
+      #    color: good
+      #  env:
+      #    SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
 
-      - name: Notify Slack of Failure
-        if: failure()
-        uses: zuplo/github-action-slack-notify-build@v2
-        with:
-          channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
-          message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
-          status: |
-            Argo Rollouts Deployment Failed
+      #- name: Notify Slack of Failure
+      #  if: failure()
+      #  uses: zuplo/github-action-slack-notify-build@v2
+      #  with:
+      #    channel_id: ${{ inputs.SLACK_DEPLOY_CHANNEL_ID }}
+      #    message_id: ${{ steps.gh-deploy-prod.outputs.message_id }}
+      #    status: |
+      #      Argo Rollouts Deployment Failed
 
-            - Argo Rollouts: ${{ inputs.ARGO_ROLLOUTS_URL }}
-            - Image Tag: ${{ env.TAG }}
-            - Actor: ${{ env.GITHUB_ACTOR }}
-            - Job URL: ${{ env.JOB_URL }}
-          color: danger
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
+      #      - Argo Rollouts: ${{ inputs.ARGO_ROLLOUTS_URL }}
+      #      - Image Tag: ${{ env.TAG }}
+      #      - Actor: ${{ env.GITHUB_ACTOR }}
+      #      - Job URL: ${{ env.JOB_URL }}
+      #    color: danger
+      #  env:
+      #    SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
