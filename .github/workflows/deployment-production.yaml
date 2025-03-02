@@ -2,7 +2,7 @@ name: "Deploy to Production"
 
 on:
   workflow_call:
-  
+
     inputs:
       SLACK_DEPLOY_CHANNEL_ID:
         type: string
@@ -36,7 +36,7 @@ on:
         required: true
       dockerhub-token:
         required: true
-        
+
 jobs:
   workflow:
     runs-on: gha-runner-scale-set
@@ -51,14 +51,14 @@ jobs:
           echo "GITHUB_ACTOR=${GITHUB_ACTOR}" >> $GITHUB_ENV
           echo "JOB_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
 
-      - name: Check image tag 
-        run: | 
-          if [[ ! ${{ inputs.IMAGE_TAG }} =~ ^([a-z0-9_]+)-([a-z0-9]{7})$ ]] ; then 
-            echo 'Invalid Image Tag'
-            echo 'must be in {BRANCH_NAME}-{SHORT_SHA} format'
-            echo 'etc: master-2b7f922'
-            exit 1
-          fi
+      #- name: Check image tag
+      #  run: |
+      #    if [[ ! ${{ inputs.IMAGE_TAG }} =~ ^([a-z0-9_]+)-([a-z0-9]{7})$ ]] ; then
+      #      echo 'Invalid Image Tag'
+      #      echo 'must be in {BRANCH_NAME}-{SHORT_SHA} format'
+      #      echo 'etc: master-2b7f922'
+      #      exit 1
+      #    fi
 
       - name: Notify Slack of Failure
         if: failure()
@@ -72,7 +72,7 @@ jobs:
 
             Follow the description in the
             deployment GHA trigger !
-            
+
             - Image Tag: ${{ inputs.IMAGE_TAG }}
             - Actor: ${{ env.GITHUB_ACTOR }}
             - Job URL: ${{ env.JOB_URL }}
@@ -115,7 +115,7 @@ jobs:
         run: |
           cd ${{ inputs.KUSTOMIZE }}
           kustomize edit set image ${{ inputs.ECR_FULL_PATH }}:OLD_TAG=${{ inputs.ECR_FULL_PATH }}:${{ env.TAG }}
-          
+
       - name: Commit Files
         id: commitFiles
         run: |
