@@ -78,7 +78,7 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.slack-bot-token }}
 
       - name: Checkout k8s-deployment repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: hitch-technologies/${{ inputs.DEPLOYMENT_REPO }}
           token: ${{ secrets.gh-pat }}
